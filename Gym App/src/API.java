@@ -65,26 +65,29 @@ public class API {
                         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         if (response.statusCode() == 200) {
                             // do something depending on status code
-                            String responseStr = "Valid Post Request";
+                            // String responseStr = "Valid Post Request";
 
-                            sendResponse(exchange, responseStr, response.statusCode());
+                            sendResponse(exchange, response.body(), response.statusCode());
+                        } else {
+                            sendResponse(exchange, response.body(), response.statusCode());
+                        }
                             
-                        } else if (response.statusCode() == 400) { // Bad Request
-                            String responseStr = "Invalid Fields";
-                            sendResponse(exchange, responseStr, response.statusCode());
+                        // } else if (response.statusCode() == 400) { // Bad Request
+                        //     String responseStr = "Invalid Fields";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
 
 
-                        } else if (response.statusCode() == 404) { // User not found
-                            String responseStr = "User does not exist";
-                            sendResponse(exchange, responseStr, response.statusCode());
+                        // } else if (response.statusCode() == 404) { // User not found
+                        //     String responseStr = "User does not exist";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
 
-                        } else { // else 
-                            String responseStr = "Server error, please try again.";
-                            sendResponse(exchange, responseStr, response.statusCode());
-                        }
-                        } catch (InterruptedException e) {
-                            System.out.println(e);
-                        }
+                        // } else { // else 
+                        //     #String responseStr = "Server error, please try again.";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
+                        // }
+                    } catch (InterruptedException e) {
+                        System.out.println(e);
+                    }
 
                 } else if ("GET".equals(exchange.getRequestMethod())) {
 

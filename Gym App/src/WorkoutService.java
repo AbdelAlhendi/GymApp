@@ -17,8 +17,10 @@ import javax.swing.plaf.synth.SynthEditorPaneUI;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.Authenticator.Result;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.sql.*;
 
@@ -85,22 +87,90 @@ public class WorkoutService {
 
                         int weight = workoutJsonLst.getInt(0);
                         String notes = workoutJsonLst.getString(1);
-                        System.out.println(weight);
-                        System.out.println(notes);
 
                         try {
-                            insertWorkout(workout, weight, notes, exchange);
-                        } catch (SQLException e) {
-                            sendResponse(exchange, e.getMessage(), 409);
-                            e.printStackTrace();
-                        } catch (IOException e) {
+                            ResultSet resultSet = getWorkout(workout, exchange);
+                            if (resultSet.next() != false) {
+                                sendResponse(exchange, "Workout already inserted", 405);
+                            } else {
+                                try {
+                                    insertWorkout(workout, weight, notes, exchange);
+                                } catch (SQLException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+
+                                sendResponse(exchange, "Workout inserted successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
                             sendResponse(exchange, e.getMessage(), 409);
                             e.printStackTrace();
                         }
+                    
+                    } else if (json.getString("command").equals("putWorkout")) {
+                        JSONObject workoutJson = json.getJSONObject("workouts");
+                        String workout = workoutJson.keys().next().toString();
 
+                        JSONArray workoutJsonLst = workoutJson.getJSONArray(workout);
 
+                        int weight = -1;
+                        String notes = null;
+                        
+                        if (workoutJsonLst.length() == 2) {
+                            weight = workoutJsonLst.getInt(0);
+                            notes = workoutJsonLst.getString(1);
+                        } else {
+                            try {
+                                weight = workoutJsonLst.getInt(0);
+                            } catch (JSONException e) {
+                                notes = workoutJsonLst.getString(0);
+                            }
+                        }
+
+                        try {
+                            ResultSet resultSet = getWorkout(workout, exchange);
+                            if (resultSet.next() == false) {
+                                sendResponse(exchange, "No Workout to update", 405);
+                            } else {
+                                try {
+                                    updateWorkout(workout, weight, notes, exchange);
+                                } catch (SQLException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+
+                                sendResponse(exchange, "Workout updated successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
                     } else if (json.getString("command").equals("deleteWorkout")) {
+                        String workout = json.getString("workouts");
 
+                        try {
+                            ResultSet resultSet = getWorkout(workout, exchange);
+                            if (resultSet.next() == false) {
+                                sendResponse(exchange, "No Workout to delete", 405);
+                            } else {
+                                try {
+                                    deleteWorkout(workout, exchange);
+                                } catch (SQLException | IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } 
+                                sendResponse(exchange, "Workout deleted successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
                     } else {
                         sendResponse(exchange, "Invalid Command", 400);
                     }
@@ -130,7 +200,36 @@ public class WorkoutService {
                 public void handle(HttpExchange exchange) throws IOException {
                     // Handle GET requests for recieve context
                     if ("GET".equals(exchange.getRequestMethod())) {
+                        JSONObject json = new JSONObject(getRequestBody(exchange));
 
+                        System.out.println(json.toString());
+
+                    if (json.getString("command").equals("getSplit")) {
+
+                    } else if (json.getString("command").equals("getWeek")) {
+
+                    } else if (json.getString("command").equals("getWorkout")) { // NEEDS MORE WORK
+                        String workout = json.getString("workouts");
+
+                        try {
+                            ResultSet resultSet = getWorkout(workout, exchange);
+                            if ((resultSet == null) || resultSet.next() == false) {
+                                sendResponse(exchange, "Workout does not exist", 404);
+                            } else {
+                                JSONObject resultJson = new JSONObject();
+                                resultJson.put("weight", resultSet.getInt(0));
+                                resultSet.next();
+                                resultJson.put("notes", resultSet.getString(0));
+                                System.out.println(resultSet);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        sendResponse(exchange, "Invalid Command", 400);
+                    }
                     } else {
                         // Send a 405 Method Not Allowed response for non-POST request
                         exchange.sendResponseHeaders(405, 0);
@@ -207,31 +306,33 @@ public class WorkoutService {
             //String deleteTable = "DROP TABLE IF EXISTS splits;";
 
             String table = "CREATE TABLE IF NOT EXISTS workouts (\n"
-                    + "   workout STRING PRIMARY KEY,\n"
+                    + "   workout TEXT PRIMARY KEY,\n"
                     + "   weight INTEGER NOT NULL,\n"
-                    + "   notes STRING NOT NULL\n" +
+                    + "   notes TEXT NOT NULL\n" +
                     ");";
 
             String table2 = "CREATE TABLE IF NOT EXISTS splits (\n"
-            + "   splitName STRING PRIMARY KEY,\n"
-            + "   workouts STRING NOT NULL\n" + 
+            + "   splitName TEXT PRIMARY KEY,\n"
+            + "   workout TEXT NOT NULL,\n"
+            + "   FOREIGN KEY (workout) REFERENCES workouts(workout)\n" + 
             ");";
 
             String table3 = "CREATE TABLE IF NOT EXISTS schedule (\n"
-            + "   weekday STRING PRIMARY KEY,\n"
-            + "   splitName STRING NOT NULL\n" + 
+            + "   weekday TEXT PRIMARY KEY,\n"
+            + "   splitName TEXT NOT NULL,\n"
+            + "   FOREIGN KEY (splitName) REFERENCES splits(splitName)\n" + 
             ");";
 
             try (Connection con = DriverManager.getConnection(path)) {
                 if (con != null) {
                     var pstmt = con.prepareStatement(table);
-                    pstmt.execute();
+                    pstmt.executeUpdate();
 
                     var pstmt2 = con.prepareStatement(table2);
-                    pstmt2.execute();
+                    pstmt2.executeUpdate();
 
                     var pstmt3 = con.prepareStatement(table3);
-                    pstmt3.execute();
+                    pstmt3.executeUpdate();
                     System.out.println("Tables created");
                 }
             } catch (SQLException e) {
@@ -258,6 +359,78 @@ public class WorkoutService {
                 System.out.println(e.getMessage());
             }
 
+        }
+
+        public static void updateWorkout(String workout, int weight, String notes, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "UPDATE workouts SET";
+            
+            if (weight != -1) {
+                query += " weight = ?";
+                if (notes != null) {query += " ,";}
+            }
+
+            if (notes != null) {
+                query += " notes = ?";
+            }
+            query += " WHERE workout = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    int i = 1;
+                    if (weight != -1) {
+                        pstmt.setInt(i, weight);
+                        i++;
+                    }
+                    if (notes != null) {
+                        pstmt.setString(i, notes);
+                        i++;
+                    }
+                    pstmt.setString(i, workout);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static void deleteWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "DELETE FROM workouts WHERE workout = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, workout);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static ResultSet getWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "SELECT weight, notes FROM workouts WHERE workout = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, workout);
+                    var resultSet = pstmt.executeQuery();
+                    return resultSet;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
         }
 
         // public static void insert(UserService user, HttpExchange exchange) throws SQLException, IOException {
