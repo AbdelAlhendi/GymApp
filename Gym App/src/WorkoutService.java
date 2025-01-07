@@ -8,7 +8,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 
 import javax.swing.plaf.synth.SynthEditorPaneUI;
@@ -17,6 +18,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.sql.*;
 
@@ -34,6 +36,7 @@ public class WorkoutService {
         if (connect() == null) {
             createNewDatabase();
         }
+        createNewTable();
 
         server.createContext("/workout", new Forwarder());
         server.createContext("/workout/", new Receiver());
@@ -62,17 +65,41 @@ public class WorkoutService {
             public void handle(HttpExchange exchange) throws IOException {
                 // Handle POST request for /workout
                 if ("POST".equals(exchange.getRequestMethod())) {
-                    JSONObject workoutJson = new JSONObject(getRequestBody(exchange));
+                    JSONObject json = new JSONObject(getRequestBody(exchange));
 
-                    System.out.println(workoutJson.toString());
+                    System.out.println(json.toString());
 
-                    if (workoutJson.getString("command").equals("putSplit")) {
+                    if (json.getString("command").equals("postSplit")) {
 
-                    } else if (workoutJson.getString("command").equals("removeSplit")) {
+                    } else if (json.getString("command").equals("deleteSplit")) {
 
-                    } else if (workoutJson.getString("command").equals("putWeek")) {
+                    } else if (json.getString("command").equals("postWeek")) {
 
-                    } else if (workoutJson.getString("command").equals("removeWeek")) {
+                    } else if (json.getString("command").equals("deleteWeek")) {
+
+                    } else if (json.getString("command").equals("postWorkout")) {
+                        JSONObject workoutJson = json.getJSONObject("workouts");
+                        String workout = workoutJson.keys().next().toString();
+
+                        JSONArray workoutJsonLst = workoutJson.getJSONArray(workout);
+
+                        int weight = workoutJsonLst.getInt(0);
+                        String notes = workoutJsonLst.getString(1);
+                        System.out.println(weight);
+                        System.out.println(notes);
+
+                        try {
+                            insertWorkout(workout, weight, notes, exchange);
+                        } catch (SQLException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+
+                    } else if (json.getString("command").equals("deleteWorkout")) {
 
                     } else {
                         sendResponse(exchange, "Invalid Command", 400);
@@ -139,7 +166,7 @@ public class WorkoutService {
 
 
         private static void createNewDatabase() throws SQLException {
-            String path = "jdbc:sqlite:sqlite/db/workoutDB.db";
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
             
 
             try (Connection con = DriverManager.getConnection(path)) {
@@ -161,7 +188,7 @@ public class WorkoutService {
                 Class.forName("org.sqlite.JDBC");
 
                 // Connect to the SQLite database
-                String path = "jdbc:sqlite:sqlite/db/workoutDB.db";
+                String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
 
                 con = DriverManager.getConnection(path);
             } catch (SQLException e) {
@@ -171,27 +198,65 @@ public class WorkoutService {
         }
 
         public static void createNewTable() {
-            String path = "jdbc:sqlite:sqlite/db/workoutDB.db";
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
             /*
              * table will hold all different workouts for user to pick from based on their name and then enter their weight, notes, etc. (shoulderPress, benchPress, etc.)
              * table2 will hold the name of the split along with a string containting all workouts for the day (shoulderPress,benchPress,...)
              * table3 will hold the weekly schedule based on weekday then the split for that day or restday
              */
-            String table = "CREATE TABLE IF NOT EXISTS workouts (\n)"
-                    + "   workout string PRIMARY KEY,\n"
-                    + "   weight integer NOT NULL,\n"
-                    + "   notes string NOT NULL,\n" +
+            //String deleteTable = "DROP TABLE IF EXISTS splits;";
+
+            String table = "CREATE TABLE IF NOT EXISTS workouts (\n"
+                    + "   workout STRING PRIMARY KEY,\n"
+                    + "   weight INTEGER NOT NULL,\n"
+                    + "   notes STRING NOT NULL\n" +
                     ");";
 
-            String table2 = "CREATE TABLE IF NOT EXISTS splits (\n)"
-            + "   splitName string PRIMARY KEY,\n"
-            + "   workouts string NOT NULL,\n" + 
+            String table2 = "CREATE TABLE IF NOT EXISTS splits (\n"
+            + "   splitName STRING PRIMARY KEY,\n"
+            + "   workouts STRING NOT NULL\n" + 
             ");";
 
-            String table3 = "CREATE TABLE IF NOT EXISTS schedule (\n)"
-            + "   weekday string PRIMARY KEY,\n"
-            + "   splitName string NOT NULL,\n" + 
+            String table3 = "CREATE TABLE IF NOT EXISTS schedule (\n"
+            + "   weekday STRING PRIMARY KEY,\n"
+            + "   splitName STRING NOT NULL\n" + 
             ");";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(table);
+                    pstmt.execute();
+
+                    var pstmt2 = con.prepareStatement(table2);
+                    pstmt2.execute();
+
+                    var pstmt3 = con.prepareStatement(table3);
+                    pstmt3.execute();
+                    System.out.println("Tables created");
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
+
+        public static void insertWorkout(String workout, int weight, String notes, HttpExchange exchange) throws SQLException, IOException { // inserts a workout/split/week into database based on given json
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "INSERT INTO workouts(workout,weight,notes) VALUES(?,?,?)";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, workout);
+                    pstmt.setInt(2, weight);
+                    pstmt.setString(3, notes);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
 
         }
 

@@ -1,0 +1,19 @@
+{
+    "java.project.sourcePaths": [
+        "Gym App\\src"
+    ],
+    "java.project.referencedLibraries": [
+        "Gym App\\lib\\activation.jar",
+        "Gym App\\lib\\bson-5.0.0-beta0.jar",
+        "Gym App\\lib\\jackson-annotations-2.16.1.jar",
+        "Gym App\\lib\\jackson-core-2.16.1.jar",
+        "Gym App\\lib\\jackson-databind-2.16.1.jar",
+        "Gym App\\lib\\javax.mail.jar",
+        "Gym App\\lib\\json-20140107.jar",
+        "Gym App\\lib\\mongodb-driver-core-5.0.0-beta0.jar",
+        "Gym App\\lib\\mongodb-driver-sync-5.0.0-beta0.jar",
+        "Gym App\\lib\\slf4j-api-1.7.36.jar",
+        "Gym App\\lib\\slf4j-simple-1.7.36.jar",
+        "Gym App\\lib\\sqlite-jdbc-3.45.0.0.jar"
+    ]
+}

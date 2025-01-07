@@ -50,7 +50,6 @@ if __name__ == "__main__":
     ip = "127.0.0.1"
     url = "http://" + str(ip) + ":" + str(port) + "/workout"
 
-    data = {"command" : "commandTest",
-            "workouts" : "splitTest",
-            "workoutJSON" : {"Shoulders" : {"ShoulderPress" : 10}}} #Still need to add notes to json
+    data = {"command" : "postWorkout",
+            "workouts" : {"shoulderPress" : [0, ""]}} #Still need to add notes to json
     make_post_request(url, data)
