@@ -72,6 +72,30 @@ public class WorkoutService {
                     System.out.println(json.toString());
 
                     if (json.getString("command").equals("postSplit")) {
+                        String splitName = json.keys().next().toString();
+                        JSONArray workoutLst = json.getJSONArray(splitName);
+
+                        try {
+                            ResultSet resultSet = getSplit(splitName, exchange);
+                            if (resultSet.next() != false) {
+                                sendResponse(exchange, "Split already inserted", 405);
+                            } else {
+                                try {
+                                    insertSplit(splitName, workoutLst, exchange);
+                                } catch (SQLException | IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+                        sendResponse(exchange, "Split inserted successfully", 200);
+
+
+                    } else if (json.getString("command").equals("putSplit")) {
 
                     } else if (json.getString("command").equals("deleteSplit")) {
 
@@ -313,14 +337,38 @@ public class WorkoutService {
 
             String table2 = "CREATE TABLE IF NOT EXISTS splits (\n"
             + "   splitName TEXT PRIMARY KEY,\n"
-            + "   workout TEXT NOT NULL,\n"
-            + "   FOREIGN KEY (workout) REFERENCES workouts(workout)\n" + 
+            + "   workoutLst TEXT NOT NULL,\n"
+            + "   FOREIGN KEY (workoutLst) REFERENCES workoutLsts(workoutLst)\n" + 
             ");";
 
             String table3 = "CREATE TABLE IF NOT EXISTS schedule (\n"
             + "   weekday TEXT PRIMARY KEY,\n"
             + "   splitName TEXT NOT NULL,\n"
             + "   FOREIGN KEY (splitName) REFERENCES splits(splitName)\n" + 
+            ");";
+
+            String table4 = "CREATE TABLE IF NOT EXISTS workoutLsts (\n"
+            + "   workoutLst TEXT PRIMARY KEY,\n"
+            + "   workout1 TEXT,\n"
+            + "   workout2 TEXT,\n"
+            + "   workout3 TEXT,\n"
+            + "   workout4 TEXT,\n"
+            + "   workout5 TEXT,\n"
+            + "   workout6 TEXT,\n"
+            + "   workout7 TEXT,\n"
+            + "   workout8 TEXT,\n"
+            + "   workout9 TEXT,\n"
+            + "   workout10 TEXT,\n"
+            + "   FOREIGN KEY (workout1) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout2) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout3) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout4) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout5) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout6) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout7) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout8) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout9) REFERENCES workouts(workout)\n"
+            + "   FOREIGN KEY (workout10) REFERENCES workouts(workout)\n" +
             ");";
 
             try (Connection con = DriverManager.getConnection(path)) {
@@ -333,6 +381,10 @@ public class WorkoutService {
 
                     var pstmt3 = con.prepareStatement(table3);
                     pstmt3.executeUpdate();
+
+                    var pstmt4 = con.prepareStatement(table4);
+                    pstmt4.executeUpdate();
+
                     System.out.println("Tables created");
                 }
             } catch (SQLException e) {
@@ -423,6 +475,55 @@ public class WorkoutService {
                 if (con != null) {
                     var pstmt = con.prepareStatement(query);
                     pstmt.setString(1, workout);
+                    var resultSet = pstmt.executeQuery();
+                    return resultSet;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
+        }
+
+        public static void insertSplit(String splitName, JSONArray workoutlst, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query1 = "INSERT INTO workoutLsts(workoutLst, workout1, workout2, workout3, workout4"
+             + ", workout5, workout6, workout7, workout8, workout9, workout10) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+
+            String query2 = "INSERT INTO splits(splitName, workoutLst) VALUES(?,?)";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt1 = con.prepareStatement(query1);
+                    pstmt1.setString(1, splitName);
+
+                    for (int i = 0; i < workoutlst.length(); i++) {
+                        pstmt1.setString(i + 2, workoutlst.getString(i));
+                    }
+                    pstmt1.executeUpdate();
+
+                    var pstmt2 = con.prepareStatement(query2);
+                    pstmt2.setString(1, splitName);
+                    pstmt2.setString(2, splitName);
+                    pstmt2.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static ResultSet getSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "SELECT workout1, workout2, workout3, workout4, workout5,"
+            + " workout6, workout7, workout8, workout9, workout10 FROM workoutLsts WHERE workoutLst = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, splitName);
                     var resultSet = pstmt.executeQuery();
                     return resultSet;
                 }

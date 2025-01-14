@@ -1,1 +1,1 @@
-{"command": "postWorkout", "workouts": {"lateralRaises": [10, "Tested"]}}
+{"command": "postSplit", "Shoulders": ["shoulderPr", "lateralRaises", "facePulls"]}
