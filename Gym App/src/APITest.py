@@ -50,11 +50,14 @@ if __name__ == "__main__":
     ip = "127.0.0.1"
     url = "http://" + str(ip) + ":" + str(port) + "/workout"
 
+    data = {"command" : "postWeek",
+        "monday" : "Shoulders"}
+
     # data = {"command" : "deleteSplit",
     #         "splitName" : "Shoulders"}
 
-    data = {"command" : "postSplit",
-            "Shoulders" : ["shoulderPress", "lateralRaises", "facePulls"]}
+    # data = {"command" : "postSplit",
+    #         "Shoulders" : ["shoulderPress", "lateralRaises", "facePulls"]}
 
     # data = {"command" : "postWorkout",
     #         "workouts" : {"shoulderPress" : [40, "Try 45"]}}
