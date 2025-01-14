@@ -96,8 +96,48 @@ public class WorkoutService {
 
 
                     } else if (json.getString("command").equals("putSplit")) {
+                        String splitName = json.keys().next().toString();
+                        JSONArray workoutLst = json.getJSONArray(splitName);
+
+                        try {
+                            ResultSet resultSet = getSplit(splitName, exchange);
+                            if (resultSet.next() == false) {
+                                sendResponse(exchange, "No Split to update", 405);
+                            } else {
+                                try {
+                                    updateSplit(splitName, workoutLst, exchange);
+                                } catch (SQLException | IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+                        sendResponse(exchange, "Split updated successfully", 200);
 
                     } else if (json.getString("command").equals("deleteSplit")) {
+                        String splitName = json.getString("splitName");
+
+                        try {
+                            ResultSet resultSet = getSplit(splitName, exchange);
+                            if (resultSet.next() == false) {
+                                sendResponse(exchange, "No Split to delete", 405);
+                            } else {
+                                try {
+                                    deleteSplit(splitName, exchange);
+                                } catch (SQLException | IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } 
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+                        sendResponse(exchange, "Split deleted successfully", 200);
 
                     } else if (json.getString("command").equals("postWeek")) {
 
@@ -506,6 +546,57 @@ public class WorkoutService {
                     var pstmt2 = con.prepareStatement(query2);
                     pstmt2.setString(1, splitName);
                     pstmt2.setString(2, splitName);
+                    pstmt2.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static void updateSplit(String splitName, JSONArray workoutlst, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "UPDATE workoutLsts SET workout1 = ?, workout2 = ?, workout3 = ?, workout4 = ?,"
+            + " workout5 = ?, workout6 = ?, workout7 = ?, workout8 = ?, workout9 = ?, workout10 = ? WHERE workoutLst = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    int i = 0;
+                    while (i < 10) {
+                        if (i + 1 > workoutlst.length()) {
+                            pstmt.setNull(i + 1, i);
+                        } else {
+                            pstmt.setString(i + 1, workoutlst.getString(i));
+                        }
+                        i++;
+                    }
+                    pstmt.setString(i + 1, splitName);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static void deleteSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query1 = "DELETE FROM splits WHERE splitName = ?";
+
+            String query2 = "DELETE FROM workoutLsts WHERE workoutLst = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt1 = con.prepareStatement(query1);
+                    var pstmt2 = con.prepareStatement(query2);
+
+                    pstmt1.setString(1, splitName);
+                    pstmt2.setString(1, splitName);
+
+                    pstmt1.executeUpdate();
                     pstmt2.executeUpdate();
                 }
             } catch (SQLException e) {

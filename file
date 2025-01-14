@@ -1,1 +1,1 @@
-{"command": "postSplit", "Shoulders": ["shoulderPr", "lateralRaises", "facePulls"]}
+{"command": "deleteSplit", "splitNae": "Shoulders"}
