@@ -109,8 +109,6 @@ public class API {
                         sendResponse(exchange, "Invalid Fields", 400);
                     }
 
-                    System.out.println(uri);
-
 
                     HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(uri))

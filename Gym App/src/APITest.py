@@ -70,8 +70,14 @@ if __name__ == "__main__":
     #data = {"command" : "deleteWorkout",
     #        "workouts" : "lateralRaises"}
 
-    data = {"command" : "getSplit",
-            "splitName" : "shoulders"}
+    # data = {"command" : "getSplit",
+    #         "splitName" : "shoulders"}
+
+    # data = {"command" : "getWorkout",
+    #         "workouts" : "shoulderPress"}
+
+    data = {"command" : "getWeek",
+            "week" : "tuesday"}
     
     #make_post_request(url, data)
     make_get_request(url, data)
