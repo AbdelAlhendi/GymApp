@@ -90,7 +90,60 @@ public class API {
                     }
 
                 } else if ("GET".equals(exchange.getRequestMethod())) {
+                    JSONObject workout = new JSONObject(getRequestBody(exchange));
 
+                    HttpClient client = HttpClient.newHttpClient();
+                    String workoutIp = "127.0.0.1";
+                    int workoutPort = 8081;
+
+                    String jsonCommand = workout.getString("command");
+                    String uri = "http://" + workoutIp + ":" + workoutPort + "/workout/" + jsonCommand + "/";
+
+                    if (jsonCommand.equals("getSplit")) {
+                        uri += workout.getString("splitName");
+                    } else if (jsonCommand.equals("getWeek")) {
+                        uri += workout.getString("week");
+                    } else if (jsonCommand.equals("getWorkout")) {
+                        uri += workout.getString("workouts");
+                    } else {
+                        sendResponse(exchange, "Invalid Fields", 400);
+                    }
+
+                    System.out.println(uri);
+
+
+                    HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(uri))
+                        .GET()
+                        .build();
+
+                    try {
+                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                        if (response.statusCode() == 200) {
+                            // do something depending on status code
+                            // String responseStr = "Valid Post Request";
+
+                            sendResponse(exchange, response.body(), response.statusCode());
+                        } else {
+                            sendResponse(exchange, response.body(), response.statusCode());
+                        }
+                            
+                        // } else if (response.statusCode() == 400) { // Bad Request
+                        //     String responseStr = "Invalid Fields";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
+
+
+                        // } else if (response.statusCode() == 404) { // User not found
+                        //     String responseStr = "User does not exist";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
+
+                        // } else { // else 
+                        //     #String responseStr = "Server error, please try again.";
+                        //     sendResponse(exchange, responseStr, response.statusCode());
+                        // }
+                    } catch (InterruptedException e) {
+                        System.out.println(e);
+                    }
                 } else {
                     sendResponse(exchange, "Unknown request", 405);
                 }

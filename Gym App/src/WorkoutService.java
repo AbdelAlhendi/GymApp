@@ -72,12 +72,13 @@ public class WorkoutService {
                     System.out.println(json.toString());
 
                     if (json.getString("command").equals("postSplit")) {
-                        String splitName = json.keys().next().toString();
-                        JSONArray workoutLst = json.getJSONArray(splitName);
+                        JSONObject splitJson = json.getJSONObject("splitName");
+                        String splitName = splitJson.keys().next().toString();
+                        JSONArray workoutLst = splitJson.getJSONArray(splitName);
 
                         try {
-                            ResultSet resultSet = getSplit(splitName, exchange);
-                            if (resultSet.next() != false) {
+                            JSONArray workoutLstReturn = getSplit(splitName, exchange);
+                            if (workoutLstReturn.length() != 0) {
                                 sendResponse(exchange, "Split already inserted", 405);
                             } else {
                                 try {
@@ -96,12 +97,13 @@ public class WorkoutService {
 
 
                     } else if (json.getString("command").equals("putSplit")) {
-                        String splitName = json.keys().next().toString();
-                        JSONArray workoutLst = json.getJSONArray(splitName);
+                        JSONObject splitJson = json.getJSONObject("splitName");
+                        String splitName = splitJson.keys().next().toString();
+                        JSONArray workoutLst = splitJson.getJSONArray(splitName);
 
                         try {
-                            ResultSet resultSet = getSplit(splitName, exchange);
-                            if (resultSet.next() == false) {
+                            JSONArray workoutLstReturn = getSplit(splitName, exchange);
+                            if (workoutLstReturn.length() == 0) {
                                 sendResponse(exchange, "No Split to update", 405);
                             } else {
                                 try {
@@ -122,8 +124,8 @@ public class WorkoutService {
                         String splitName = json.getString("splitName");
 
                         try {
-                            ResultSet resultSet = getSplit(splitName, exchange);
-                            if (resultSet.next() == false) {
+                            JSONArray workoutLst = getSplit(splitName, exchange);
+                            if (workoutLst.length() == 0) {
                                 sendResponse(exchange, "No Split to delete", 405);
                             } else {
                                 try {
@@ -140,8 +142,80 @@ public class WorkoutService {
                         sendResponse(exchange, "Split deleted successfully", 200);
 
                     } else if (json.getString("command").equals("postWeek")) {
+                        JSONObject weekJson = json.getJSONObject("week");
+                        String weekday = weekJson.keys().next().toString();
+                        String splitName = weekJson.getString(weekday);
+
+
+                        try {
+                            String splitNameReturn = getWeek(weekday, exchange);
+                            if (!splitNameReturn.equals("")) {
+                                sendResponse(exchange, "Weekday already inserted", 405);
+                            } else {
+                                try {
+                                    insertWeek(weekday, splitName, exchange);
+                                } catch (SQLException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+
+                                sendResponse(exchange, "Weekday inserted successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+                    } else if (json.getString("command").equals("putWeek")) {
+                        JSONObject weekJson = json.getJSONObject("week");
+                        String weekday = weekJson.keys().next().toString();
+                        String splitName = weekJson.getString(weekday);
+
+                        try {
+                            String splitNameReturn = getWeek(weekday, exchange);
+                            if (splitNameReturn.equals("")) {
+                                sendResponse(exchange, "No Weekday to update", 405);
+                            } else {
+                                try {
+                                    updateWeek(weekday, splitName, exchange);
+                                } catch (SQLException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                }
+
+                                sendResponse(exchange, "Weekday updated successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
 
                     } else if (json.getString("command").equals("deleteWeek")) {
+                        String weekday = json.getString("week");
+
+                        try {
+                            String splitName = getWeek(weekday, exchange);
+                            if (splitName.equals("")) {
+                                sendResponse(exchange, "No Weekday to delete", 405);
+                            } else {
+                                try {
+                                    deleteWeek(weekday, exchange);
+                                } catch (SQLException | IOException e) {
+                                    sendResponse(exchange, e.getMessage(), 409);
+                                    e.printStackTrace();
+                                } 
+                                sendResponse(exchange, "Weekday deleted successfully", 200);
+                            }
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
 
                     } else if (json.getString("command").equals("postWorkout")) {
                         JSONObject workoutJson = json.getJSONObject("workouts");
@@ -153,8 +227,8 @@ public class WorkoutService {
                         String notes = workoutJsonLst.getString(1);
 
                         try {
-                            ResultSet resultSet = getWorkout(workout, exchange);
-                            if (resultSet.next() != false) {
+                            JSONArray workoutStatsLst = getWorkout(workout, exchange);
+                            if (workoutStatsLst.length() != 0) {
                                 sendResponse(exchange, "Workout already inserted", 405);
                             } else {
                                 try {
@@ -195,8 +269,8 @@ public class WorkoutService {
                         }
 
                         try {
-                            ResultSet resultSet = getWorkout(workout, exchange);
-                            if (resultSet.next() == false) {
+                            JSONArray workoutStatsLst = getWorkout(workout, exchange);
+                            if (workoutStatsLst.length() == 0) {
                                 sendResponse(exchange, "No Workout to update", 405);
                             } else {
                                 try {
@@ -219,8 +293,8 @@ public class WorkoutService {
                         String workout = json.getString("workouts");
 
                         try {
-                            ResultSet resultSet = getWorkout(workout, exchange);
-                            if (resultSet.next() == false) {
+                            JSONArray workoutStatsLst = getWorkout(workout, exchange);
+                            if (workoutStatsLst.length() == 0) {
                                 sendResponse(exchange, "No Workout to delete", 405);
                             } else {
                                 try {
@@ -264,28 +338,38 @@ public class WorkoutService {
                 public void handle(HttpExchange exchange) throws IOException {
                     // Handle GET requests for recieve context
                     if ("GET".equals(exchange.getRequestMethod())) {
-                        JSONObject json = new JSONObject(getRequestBody(exchange));
+                        String[] uri = exchange.getRequestURI().toString().split("/");
+                        String command = uri[2];
+                        
 
-                        System.out.println(json.toString());
-
-                    if (json.getString("command").equals("getSplit")) {
-
-                    } else if (json.getString("command").equals("getWeek")) {
-
-                    } else if (json.getString("command").equals("getWorkout")) { // NEEDS MORE WORK
-                        String workout = json.getString("workouts");
-
+                    if (command.equals("getSplit")) {
+                        String splitName = uri[3];
                         try {
-                            ResultSet resultSet = getWorkout(workout, exchange);
-                            if ((resultSet == null) || resultSet.next() == false) {
-                                sendResponse(exchange, "Workout does not exist", 404);
-                            } else {
-                                JSONObject resultJson = new JSONObject();
-                                resultJson.put("weight", resultSet.getInt(0));
-                                resultSet.next();
-                                resultJson.put("notes", resultSet.getString(0));
-                                System.out.println(resultSet);
-                            }
+                            JSONArray workoutLst = getSplit(splitName, exchange);
+
+                            sendResponse(exchange, workoutLst.toString(), 200);
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+
+
+                    } else if (command.equals("getWeek")) {
+                        String week = uri[3];
+                        try {
+                            String splitName = getWeek(week, exchange);
+
+                            sendResponse(exchange, splitName.toString(), 200);
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+                    } else if (command.equals("getWorkout")) {
+                        String workouts = uri[3];
+                        try {
+                            JSONArray workoutStatsLst = getWorkout(workouts, exchange);
+
+                            sendResponse(exchange, workoutStatsLst.toString(), 200);
                         } catch (SQLException | IOException e) {
                             sendResponse(exchange, e.getMessage(), 409);
                             e.printStackTrace();
@@ -506,7 +590,7 @@ public class WorkoutService {
             }
         }
 
-        public static ResultSet getWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
+        public static JSONArray getWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
             String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
 
             String query = "SELECT weight, notes FROM workouts WHERE workout = ?";
@@ -515,8 +599,14 @@ public class WorkoutService {
                 if (con != null) {
                     var pstmt = con.prepareStatement(query);
                     pstmt.setString(1, workout);
-                    var resultSet = pstmt.executeQuery();
-                    return resultSet;
+                    ResultSet resultSet = pstmt.executeQuery();
+                    JSONArray workoutStatslst = new JSONArray();
+                    if (resultSet.next()) {
+                        workoutStatslst.put(0, resultSet.getInt("weight"));
+                        workoutStatslst.put(1, resultSet.getString("notes"));
+                    }
+                    resultSet.close();
+                    return workoutStatslst;
                 }
             } catch (SQLException e) {
                 sendResponse(exchange, e.getMessage(), 409);
@@ -605,7 +695,7 @@ public class WorkoutService {
             }
         }
 
-        public static ResultSet getSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
+        public static JSONArray getSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
             String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
 
             String query = "SELECT workout1, workout2, workout3, workout4, workout5,"
@@ -615,8 +705,102 @@ public class WorkoutService {
                 if (con != null) {
                     var pstmt = con.prepareStatement(query);
                     pstmt.setString(1, splitName);
-                    var resultSet = pstmt.executeQuery();
-                    return resultSet;
+                    ResultSet resultSet = pstmt.executeQuery();
+
+                    JSONArray workoutLst = new JSONArray();
+                    int i = 1;
+                    if (resultSet.next()) {
+                        while (i < 11) {
+                            if (resultSet.getString("workout" + i) != null) {
+                                workoutLst.put(i - 1, resultSet.getString("workout" + i));
+                            } else {
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+                    resultSet.close();
+                    return workoutLst;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
+        }
+
+
+        public static void insertWeek(String weekday, String splitName, HttpExchange exchange) throws SQLException, IOException { // inserts a workout/split/week into database based on given json
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "INSERT INTO schedule(weekday,splitName) VALUES(?,?)";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, weekday);
+                    pstmt.setString(2, splitName);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+
+        }
+
+        public static void updateWeek(String weekday, String splitName, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "UPDATE schedule SET splitName = ? WHERE weekday = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, splitName);
+                    pstmt.setString(2, weekday);
+
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static void deleteWeek(String weekday, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "DELETE FROM schedule WHERE weekday = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, weekday);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+        }
+
+        public static String getWeek(String weekday, HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:Gym App/sqlite/db/workoutDB.db";
+
+            String query = "SELECT splitName FROM schedule WHERE weekday = ?";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    pstmt.setString(1, weekday);
+                    ResultSet resultSet = pstmt.executeQuery();
+                    String splitName = "";
+                    if (resultSet.next()) {
+                        splitName = resultSet.getString("splitName");
+                    }
+                    resultSet.close();
+                    return splitName;
                 }
             } catch (SQLException e) {
                 sendResponse(exchange, e.getMessage(), 409);
