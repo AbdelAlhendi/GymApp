@@ -28,7 +28,7 @@ import java.sql.*;
 
 public class WorkoutService {
         public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
-        int port = 8081;
+        int port = 8082;
         // System.out.println("Server started on port " + port);
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -376,7 +376,17 @@ public class WorkoutService {
                             e.printStackTrace();
                         }
 
-                    } else {
+                    } else if (command.equals("getWorkoutAll")) {
+                        try {
+                            JSONObject workoutStatsLst = getWorkoutAll(exchange);
+
+                            sendResponse(exchange, workoutStatsLst.toString(), 200);
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
                         sendResponse(exchange, "Invalid Command", 400);
                     }
                     } else {
@@ -608,6 +618,33 @@ public class WorkoutService {
                     }
                     resultSet.close();
                     return workoutStatslst;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
+        }
+        public static JSONObject getWorkoutAll(HttpExchange exchange) throws SQLException, IOException {
+            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+
+            String query = "SELECT workout, weight, notes FROM workouts";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    ResultSet resultSet = pstmt.executeQuery();
+                    // JSONArray workoutStatslst = new JSONArray();
+                    JSONObject workoutLst = new JSONObject();
+
+                    while (resultSet.next()) {
+                        JSONArray workoutLstArray = new JSONArray();
+                        workoutLstArray.put(0, resultSet.getInt("weight"));
+                        workoutLstArray.put(1, resultSet.getString("notes"));
+                        workoutLst.put(resultSet.getString("workout"), workoutLstArray);
+                    }
+                    resultSet.close();
+                    return workoutLst;
                 }
             } catch (SQLException e) {
                 sendResponse(exchange, e.getMessage(), 409);

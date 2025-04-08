@@ -20,6 +20,11 @@ import com.sun.net.httpserver.HttpServer;
 
 import org.json.JSONObject;
 
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.web.servlet.config.annotation.CorsRegistry;
+// import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 
 public class API {
 
@@ -49,6 +54,14 @@ public class API {
 
         static class WorkoutHandler implements HttpHandler {
             public void handle (HttpExchange exchange) throws IOException {
+                if ("OPTIONS".equals(exchange.getRequestMethod())) {
+                    exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                    exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                    exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+                    exchange.sendResponseHeaders(204, -1); // 204 No Content
+                    exchange.close();
+                    return;
+                }
                 if ("POST".equals(exchange.getRequestMethod())) {
                     JSONObject workout = new JSONObject(getRequestBody(exchange));
 
@@ -91,24 +104,44 @@ public class API {
                     }
 
                 } else if ("GET".equals(exchange.getRequestMethod())) {
-                    JSONObject workout = new JSONObject(getRequestBody(exchange));
+                    //System.out.println("1");
+                    String command = "";
+                    String workout = "";
+                    String[] uriReceive = exchange.getRequestURI().toString().split("/");
+                    command = uriReceive[2];
+                    if (uriReceive.length >= 4) {
+                        
+
+                        // System.out.println(command);
+                        // JSONObject workout = new JSONObject(getRequestBody(exchange));
+                        workout = uriReceive[3];
+                        System.out.println(workout + "    " + command);
+                    }
+
 
                     HttpClient client = HttpClient.newHttpClient();
                     String workoutIp = "127.0.0.1";
-                    int workoutPort = 8081;
+                    int workoutPort = 8082;
+                    // const url = "http://127.0.0.1:8080/workout/getWorkout/shoulderPress"
 
-                    String jsonCommand = workout.getString("command");
-                    String uri = "http://" + workoutIp + ":" + workoutPort + "/workout/" + jsonCommand + "/";
 
-                    if (jsonCommand.equals("getSplit")) {
-                        uri += workout.getString("splitName");
-                    } else if (jsonCommand.equals("getWeek")) {
-                        uri += workout.getString("week");
-                    } else if (jsonCommand.equals("getWorkout")) {
-                        uri += workout.getString("workouts");
-                    } else {
-                        sendResponse(exchange, "Invalid Fields", 400);
-                    }
+                    // String jsonCommand = workout.getString("command");
+                    String uri = "http://" + workoutIp + ":" + workoutPort + "/workout/" + command + "/";
+
+                    
+                    uri += workout;
+                    // System.out.println(uri);
+
+                    // if (command.equals("getSplit")) {
+                    //     uri += workout.getString("splitName");
+                    // } else if (command.equals("getWeek")) {
+                    //     uri += workout.getString("week");
+                    // } else if (command.equals("getWorkout")) {
+                    //     uri += workout.getString("workouts");
+                    // } else {
+                    //     sendResponse(exchange, "Invalid Fields", 400);
+                    // }
+                    
 
 
                     HttpRequest request = HttpRequest.newBuilder()
@@ -121,7 +154,7 @@ public class API {
                         if (response.statusCode() == 200) {
                             // do something depending on status code
                             // String responseStr = "Valid Post Request";
-
+                            System.out.println(response.body());
                             sendResponse(exchange, response.body(), response.statusCode());
                         } else {
                             sendResponse(exchange, response.body(), response.statusCode());
@@ -491,6 +524,20 @@ public class API {
             }
 
         }
+
+    // public class CorsConfig {
+        
+    //     public WebMvcConfigurer corsConfigurer() {
+    //         return new WebMvcConfigurer() {
+    //             @Override
+    //             public void addCorsMappings(CorsRegistry registry) {
+    //                 registry.addMapping("/**")
+    //                         .allowedOrigins("http://localhost:8081")
+    //                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+    //             }
+    //         };
+    //     }
+    // }
 
         // static class ChatHandler implements HttpHandler {
         

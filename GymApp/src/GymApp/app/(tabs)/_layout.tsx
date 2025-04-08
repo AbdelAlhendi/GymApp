@@ -51,8 +51,8 @@ export default function HomeLayout() {
       options={{
         title: 'Weekdays',
         headerShown: false,
-        href: null,
-        tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+        href: null
+
       }}
       />
       <Tabs.Screen
@@ -60,8 +60,8 @@ export default function HomeLayout() {
       options={{
         title: 'Splits',
         headerShown: false,
-        href: null,
-        tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+        href: null
+        
       }}
       />
       <Tabs.Screen
@@ -69,11 +69,24 @@ export default function HomeLayout() {
       options={{
         title: 'Split Edit',
         headerShown: false,
-        href: null,
-        tabBarIcon: ({ color }) => <FontAwesome size={28} name="cog" color={color} />,
+        href: null
+        
       }}
+      
       />
+      <Stack>
+      <Stack.Screen name="splitEdit" />
+      <Stack.Screen
+        name="splitEditModal"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+          
+        }}
+      />
+    </Stack>
   </Tabs>
+
     // <Stack
     //   screenOptions={{
     //     headerStyle: {
@@ -88,5 +101,6 @@ export default function HomeLayout() {
     //   <Stack.Screen name="nutrition" options={{ headerShown: false }} />
     // </Stack>
   );
+  
 }
 
