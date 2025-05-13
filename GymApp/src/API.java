@@ -67,7 +67,7 @@ public class API {
 
                     HttpClient client = HttpClient.newHttpClient();
                     String workoutIp = "127.0.0.1";
-                    int workoutPort = 8081;
+                    int workoutPort = 8082;
 
 
                     HttpRequest request = HttpRequest.newBuilder()
@@ -108,6 +108,7 @@ public class API {
                     String command = "";
                     String workout = "";
                     String[] uriReceive = exchange.getRequestURI().toString().split("/");
+                    System.out.println(uriReceive);
                     command = uriReceive[2];
                     if (uriReceive.length >= 4) {
                         

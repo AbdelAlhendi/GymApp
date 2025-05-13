@@ -1,62 +1,136 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import Button from '@/components/Button';
-import { Link } from "expo-router";
+import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
+import { Link, useLocalSearchParams } from "expo-router";
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { navigate } from "expo-router/build/global-state/routing";
+import {
+  createStaticNavigation,
+  useNavigation,
+} from '@react-navigation/native';
+import splitEditModal from "./splitEditModal";
+import splitValueEditModal from "./splitValueEditModal";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// const Stack = createNativeStackNavigator();
+
+export var splitList: Record<string, [number, string]> = {};
+export var workoutUpdate = "";
+
 
 
 export default function SplitEdit() {
-  async function getWorkouts(): Promise<(any)> {
-    //Promise<(number | string)[]
-    var json = {"command" : "Workout",
-      "workouts" : "ShoulderPress"}
-  
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout/getWorkout/shoulderPress"
-   
+  // const navigation = useNavigation();
 
-    try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: headers,
-      // body: JSON.stringify(json)
-    })
+  async function postSplit(splitName: string, splitCheck : String): Promise<(any)> {
 
+    if (Object.keys(splitList).length == 0) {
+      return "No workouts in split."
+    } else {
 
+      var workoutLst = []
+      for (let i = 0; i < Object.keys(splitList).length; i++) {
+        workoutLst.push(Object.keys(splitList).at(i))
+      }
+      console.log("workoutLst:" + workoutLst)
+
+      console.log("split Check: " + splitCheck)
+      
+      if (splitCheck == "Split Name") { // new split
+        var json = {command : "postSplit",
+            splitName : {[splitName] : workoutLst}
+        }
+      } else { // updating already existing split
+        var json = {command : "putSplit",
+            splitName : {[splitName] : workoutLst}
+        }
+      }
+
+      console.log(json)
+      
+      
     
+      const headers: Headers = new Headers()
+      headers.set('Content-Type', 'application/json')
+      const url = "http://127.0.0.1:8080/workout"
     
-    const data = await response.json()
-    console.log(response)
-    console.log(data)
-    return data
-  } catch (error) {
-    console.log(error)
+
+        try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(json)
+        })
+
+        
+        
+        const data = await response.json()
+        console.log(response)
+        console.log(data)
+        return "Split added successfully!"
+      } catch (error) {
+        console.log(error)
+      }
+
+
+      
+    }
   }
 
-
+  async function getSplits(split: String): Promise<any> {
     
+    console.log(split)
+
+    if (split != "Split Name") {
+      
+      const headers: Headers = new Headers()
+      headers.set('Content-Type', 'application/json')
+      const url = "http://127.0.0.1:8080/workout/getSplit/" + split
+      // console.log(url)
+    
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: headers,
+        })
+
+
+        
+        
+        const data = await response.json()
+        console.log(response)
+        console.log(data)
+        return data
+      } catch (error) {
+        console.log(error)
+      }
+    } 
   }
 
-  const [weight, setWeight] = useState<number | null>(null);
-  const [notes, setNotes] = useState<string>("");
-
+//   const [weight, setWeight] = useState<number | null>(null);
+//   const [notes, setNotes] = useState<string>("");
+  var [splitList, setSplitList] = useState<Record<string, [number, string]>>({});
+var {split} = useLocalSearchParams();
   useEffect(() => {
     const fetchData = async () => {
-      const workoutData = await getWorkouts();
-      //console.log('Workout Data:', workoutData);  // Check if data is being fetched correctly
+      
+      splitList = await getSplits(String(split));
+      console.log('Split List:', splitList);  // Check if data is being fetched correctly
 
-      //const [weight, notes] = workoutData;
-
-      //console.log('Fetched Weight:', weight);
-      //console.log('Fetched Notes:', notes);
-
-      // Set state with the fetched values
-      //setWeight(weight);
-      //setNotes(notes);
+      setSplitList(splitList);
+      
     };
 
     fetchData(); 
   }, []); 
+
+
+  console.log(splitList)
+  const [splitName, onChangeText1] = React.useState(split);
+  var [workoutUpdate, setWorkoutUpdate] = React.useState("");
+
+
 
   return (
     
@@ -68,14 +142,51 @@ export default function SplitEdit() {
       }}
     >
     <Text>SPLITS EDIT SCREEN</Text>
-    {/* <Link href="/(tabs)/splits"><Button label="Add a new Split"/></Link> */}
-    {/* Use a Modal to bring up list of workouts to add: https://docs.expo.dev/router/advanced/modals/ */}
+    <TextInput
+          style={styles.input}
+          onChangeText={onChangeText1}
+          value={String(splitName)}
+    />
+    {Object.entries(splitList).map(([workout, [weight, notes]], index) => (
+            <View key={index} style={{ marginVertical: 8 }}>
+
+                <Link href={{pathname:"/splitValueEditModal", params: {workoutName : workout, weight: weight, notes: notes} }} style={styles.link}>
+                  {`${workout} - ${weight}  ${notes}`}
+                </Link>
+
+
+              <Button
+                title={"Delete"}
+                color="#e43404"
+                  onPress={() => {
+                    delete splitList[workout]
+                    setSplitList(splitList)
+                    console.log(splitList)
+                  }}
+              />
+            </View>
+            
+          ))}
+          
+          
+
+
     <Link href="/splitEditModal" style={styles.link}>
         Add a workout
     </Link>
-    
-    <Text>{weight}</Text>
+    <Button
       
+      title="save"
+      color="#007AFF"
+      onPress={() => {
+        postSplit(String(splitName), String(split))
+        console.log(splitList)
+        console.log(splitName)
+
+      }}
+      
+    />
+
     </View>
   );
 }
@@ -88,6 +199,12 @@ const styles = StyleSheet.create({
   link: {
     paddingTop: 20,
     fontSize: 20,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });
 

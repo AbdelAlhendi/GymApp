@@ -26,7 +26,11 @@ import org.json.JSONObject;
 import java.sql.*;
 
 
+
+
 public class WorkoutService {
+    private static String currentDir = System.getProperty("user.dir");
+    private static String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
         public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
         int port = 8082;
         // System.out.println("Server started on port " + port);
@@ -76,9 +80,9 @@ public class WorkoutService {
                         JSONObject splitJson = json.getJSONObject("splitName");
                         String splitName = splitJson.keys().next().toString();
                         JSONArray workoutLst = splitJson.getJSONArray(splitName);
-
+                        System.out.println(workoutLst);
                         try {
-                            JSONArray workoutLstReturn = getSplit(splitName, exchange);
+                            JSONObject workoutLstReturn = getSplit(splitName, exchange);
                             if (workoutLstReturn.length() != 0) {
                                 sendResponse(exchange, "Split already inserted", 405);
                             } else {
@@ -103,7 +107,7 @@ public class WorkoutService {
                         JSONArray workoutLst = splitJson.getJSONArray(splitName);
 
                         try {
-                            JSONArray workoutLstReturn = getSplit(splitName, exchange);
+                            JSONObject workoutLstReturn = getSplit(splitName, exchange);
                             if (workoutLstReturn.length() == 0) {
                                 sendResponse(exchange, "No Split to update", 405);
                             } else {
@@ -125,7 +129,7 @@ public class WorkoutService {
                         String splitName = json.getString("splitName");
 
                         try {
-                            JSONArray workoutLst = getSplit(splitName, exchange);
+                            JSONObject workoutLst = getSplit(splitName, exchange);
                             if (workoutLst.length() == 0) {
                                 sendResponse(exchange, "No Split to delete", 405);
                             } else {
@@ -268,7 +272,7 @@ public class WorkoutService {
                                 notes = workoutJsonLst.getString(0);
                             }
                         }
-
+                        
                         try {
                             JSONArray workoutStatsLst = getWorkout(workout, exchange);
                             if (workoutStatsLst.length() == 0) {
@@ -346,7 +350,7 @@ public class WorkoutService {
                     if (command.equals("getSplit")) {
                         String splitName = uri[3];
                         try {
-                            JSONArray workoutLst = getSplit(splitName, exchange);
+                            JSONObject workoutLst = getSplit(splitName, exchange);
 
                             sendResponse(exchange, workoutLst.toString(), 200);
                         } catch (SQLException | IOException e) {
@@ -381,6 +385,15 @@ public class WorkoutService {
                             JSONObject workoutStatsLst = getWorkoutAll(exchange);
 
                             sendResponse(exchange, workoutStatsLst.toString(), 200);
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+                    } else if (command.equals("getSplitAll")) {
+                        try {
+                            JSONArray splitLst = getSplitAll(exchange);
+
+                            sendResponse(exchange, splitLst.toString(), 200);
                         } catch (SQLException | IOException e) {
                             sendResponse(exchange, e.getMessage(), 409);
                             e.printStackTrace();
@@ -424,7 +437,7 @@ public class WorkoutService {
 
 
         private static void createNewDatabase() throws SQLException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
             
 
             try (Connection con = DriverManager.getConnection(path)) {
@@ -446,7 +459,9 @@ public class WorkoutService {
                 Class.forName("org.sqlite.JDBC");
 
                 // Connect to the SQLite database
-                String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+                
+                // String currentDir = System.getProperty("user.dir");
+                // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
                 con = DriverManager.getConnection(path);
             } catch (SQLException e) {
@@ -456,7 +471,9 @@ public class WorkoutService {
         }
 
         public static void createNewTable() {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
+            // String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
             /*
              * table will hold all different workouts for user to pick from based on their name and then enter their weight, notes, etc. (shoulderPress, benchPress, etc.)
              * table2 will hold the name of the split along with a string containting all workouts for the day (shoulderPress,benchPress,...)
@@ -529,7 +546,9 @@ public class WorkoutService {
         }
 
         public static void insertWorkout(String workout, int weight, String notes, HttpExchange exchange) throws SQLException, IOException { // inserts a workout/split/week into database based on given json
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
+            // String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
 
             String query = "INSERT INTO workouts(workout,weight,notes) VALUES(?,?,?)";
 
@@ -549,7 +568,8 @@ public class WorkoutService {
         }
 
         public static void updateWorkout(String workout, int weight, String notes, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "UPDATE workouts SET";
             
@@ -585,7 +605,8 @@ public class WorkoutService {
         }
 
         public static void deleteWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "DELETE FROM workouts WHERE workout = ?";
 
@@ -602,7 +623,8 @@ public class WorkoutService {
         }
 
         public static JSONArray getWorkout(String workout, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "SELECT weight, notes FROM workouts WHERE workout = ?";
 
@@ -626,7 +648,8 @@ public class WorkoutService {
             return null;
         }
         public static JSONObject getWorkoutAll(HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "SELECT workout, weight, notes FROM workouts";
 
@@ -654,7 +677,8 @@ public class WorkoutService {
         }
 
         public static void insertSplit(String splitName, JSONArray workoutlst, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query1 = "INSERT INTO workoutLsts(workoutLst, workout1, workout2, workout3, workout4"
              + ", workout5, workout6, workout7, workout8, workout9, workout10) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
@@ -683,7 +707,8 @@ public class WorkoutService {
         }
 
         public static void updateSplit(String splitName, JSONArray workoutlst, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "UPDATE workoutLsts SET workout1 = ?, workout2 = ?, workout3 = ?, workout4 = ?,"
             + " workout5 = ?, workout6 = ?, workout7 = ?, workout8 = ?, workout9 = ?, workout10 = ? WHERE workoutLst = ?";
@@ -710,7 +735,8 @@ public class WorkoutService {
         }
 
         public static void deleteSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query1 = "DELETE FROM splits WHERE splitName = ?";
 
@@ -733,11 +759,13 @@ public class WorkoutService {
             }
         }
 
-        public static JSONArray getSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+        public static JSONObject getSplit(String splitName, HttpExchange exchange) throws SQLException, IOException {
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "SELECT workout1, workout2, workout3, workout4, workout5,"
             + " workout6, workout7, workout8, workout9, workout10 FROM workoutLsts WHERE workoutLst = ?";
+
 
             try (Connection con = DriverManager.getConnection(path)) {
                 if (con != null) {
@@ -758,7 +786,39 @@ public class WorkoutService {
                         }
                     }
                     resultSet.close();
-                    return workoutLst;
+                    JSONObject splitList = new JSONObject();
+                    for (int j = 0; j < workoutLst.length(); j++) {
+                        String workout = (String) workoutLst.get(j);
+                        JSONArray splitStats = getWorkout(workout, exchange);
+                        splitList.put(workout, splitStats);
+                    }
+                    return splitList;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
+        }
+
+        public static JSONArray getSplitAll(HttpExchange exchange) throws SQLException, IOException {
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
+
+            String query = "SELECT splitName FROM splits";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    ResultSet resultSet = pstmt.executeQuery();
+                    // JSONArray workoutStatslst = new JSONArray();
+                    JSONArray splitLst = new JSONArray();
+
+                    while (resultSet.next()) {
+                        splitLst.put(resultSet.getString("splitName"));
+                    }
+                    resultSet.close();
+                    return splitLst;
                 }
             } catch (SQLException e) {
                 sendResponse(exchange, e.getMessage(), 409);
@@ -769,7 +829,8 @@ public class WorkoutService {
 
 
         public static void insertWeek(String weekday, String splitName, HttpExchange exchange) throws SQLException, IOException { // inserts a workout/split/week into database based on given json
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "INSERT INTO schedule(weekday,splitName) VALUES(?,?)";
 
@@ -788,7 +849,8 @@ public class WorkoutService {
         }
 
         public static void updateWeek(String weekday, String splitName, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "UPDATE schedule SET splitName = ? WHERE weekday = ?";
 
@@ -807,7 +869,8 @@ public class WorkoutService {
         }
 
         public static void deleteWeek(String weekday, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "DELETE FROM schedule WHERE weekday = ?";
 
@@ -824,7 +887,8 @@ public class WorkoutService {
         }
 
         public static String getWeek(String weekday, HttpExchange exchange) throws SQLException, IOException {
-            String path = "jdbc:sqlite:GymApp/sqlite/db/workoutDB.db";
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
 
             String query = "SELECT splitName FROM schedule WHERE weekday = ?";
 

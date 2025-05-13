@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button, Modal, Alert } from 'react-native';
 import { Link, router} from 'expo-router';
 import React, { useState, useEffect } from "react";
 
+import {splitList} from './splitEdit';
+import { goBack } from 'expo-router/build/global-state/routing';
 
-export default function Modal() {
+export default function splitEditModal() {
       async function getWorkouts(): Promise<any> {
         //Promise<(number | string)[]
         // var json = {"command" : "Workout",
@@ -68,18 +70,39 @@ export default function Modal() {
     
         fetchData(); 
       }, []); 
+
 const isPresented = router.canGoBack();
+// const [modalVisible, setModalVisible] = useState(true);
+
 
   return (
+    // <Modal 
+    // //animationType="slide"
+    // visible={modalVisible}
+    // onRequestClose={() => {
+    //   Alert.alert('Modal has been closed.');
+    //   setModalVisible(!modalVisible);
+    // }}>
     <View style={styles.container}>
       <Text>Workouts</Text>
       {Object.entries(workoutData).map(([workout, [weight, notes]], index) => (
         <View key={index} style={{ marginVertical: 8 }}>
-          <Text> {workout} - {weight} ({notes})</Text>
+          {/* <Text> {workout} - {weight} ({notes})</Text> */}
+          <Button
+            title={`${workout} - ${weight} (${notes})`}
+            color="#007AFF"
+            
+            onPress={() => {
+              splitList[workout] = [weight, notes];
+              // setModalVisible(false)
+            }}
+          />
         </View>
       ))}
+      
       {isPresented && <Link href="../splitEdit">Back</Link>}
     </View>
+    // </Modal>
   );
 }
 

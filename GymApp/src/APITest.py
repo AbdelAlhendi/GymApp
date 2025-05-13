@@ -49,8 +49,8 @@ if __name__ == "__main__":
     #parse(sys.argv[1])
     port = 8080
     ip = "127.0.0.1"
-    # url = "http://" + str(ip) + ":" + str(port) + "/workout"
-    url = "http://" + str(ip) + ":" + str(port) + "/workout/"
+    url = "http://" + str(ip) + ":" + str(port) + "/workout"
+    # url = "http://" + str(ip) + ":" + str(port) + "/workout/"
 
 
     # data = {"command" : "postWeek",
@@ -59,8 +59,8 @@ if __name__ == "__main__":
     # data = {"command" : "deleteWeek",
     #     "week" : "shoulders"}
 
-    # data = {"command" : "deleteSplit",
-    #         "splitName" : "Shoulders"}
+    data = {"command" : "deleteSplit",
+            "splitName" : "Shoulders2"}
 
     # data = {"command" : "putSplit",
     #         "splitName" : {"shoulders" : ["shoulderPress", "lateralRaises", "facePulls"]}}
@@ -77,8 +77,8 @@ if __name__ == "__main__":
     # data = {"command" : "getWorkout",
     #         "workouts" : "shoulderPress"}
 
-    data = {"command" : "getWeek",
-            "week" : "tuesday"}
+    # data = {"command" : "getWeek",
+    #         "week" : "tuesday"}
     
-    #make_post_request(url, data)
-    make_get_request(url, data)
+    make_post_request(url, data)
+    # make_get_request(url, data)

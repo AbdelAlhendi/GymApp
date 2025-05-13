@@ -14,11 +14,22 @@
   
 // }
 import { FontAwesome } from '@expo/vector-icons';
-import { Stack, Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import splitEditModal from './splitEditModal';
+import splitValueEditModal from './splitValueEditModal';
+import SplitEdit from './splitEdit';
+
+
+const Stack = createNativeStackNavigator();
 
 export default function HomeLayout() {
   return (
+    
+
+
     <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }} >
     <Tabs.Screen
       name="index"
@@ -64,42 +75,38 @@ export default function HomeLayout() {
         
       }}
       />
-      <Tabs.Screen
-      name="splitEdit"
-      options={{
-        title: 'Split Edit',
-        headerShown: false,
-        href: null
-        
-      }}
+     
       
-      />
-      <Stack>
-      <Stack.Screen name="splitEdit" />
-      <Stack.Screen
-        name="splitEditModal"
-        options={{
-          presentation: 'modal',
-          headerShown: false,
-          
-        }}
-      />
-    </Stack>
-  </Tabs>
+      <Stack.Navigator>
+      
+        <Stack.Screen
+          name="SplitEdit"
+          component={SplitEdit}
+          options={{
+            title: 'SplitEdit',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="splitEditModal"
+          component={splitEditModal}
+          options={{      
+            title:"splitEditModal",
+            presentation: 'modal',
+            headerShown: false,}}
+        />
+        <Stack.Screen
+          name="splitValueEditModal"
+          component={splitValueEditModal}
+          options={{      
+            title:"splitValueEditModal",
+            presentation: 'modal',
+            headerShown: false,}}
+        />
+      </Stack.Navigator>
+      /</Tabs>
+      
 
-    // <Stack
-    //   screenOptions={{
-    //     headerStyle: {
-    //       backgroundColor: '#f4511e',
-    //     },
-    //     headerTintColor: '#fff',
-    //     headerTitleStyle: {
-    //       fontWeight: 'bold',
-    //     },
-    //   }}>
-    //   <Stack.Screen name="index" options={{ headerShown: false }} />
-    //   <Stack.Screen name="nutrition" options={{ headerShown: false }} />
-    // </Stack>
   );
   
 }
