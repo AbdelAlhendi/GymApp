@@ -1,10 +1,59 @@
-import React from "react";
-import { Text, View } from "react-native";
-import Button from '@/components/Button';
-import { Link } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
+import { Link, useLocalSearchParams } from "expo-router";
 
 
 export default function Weekdays() {
+  async function getWeekdays(): Promise<any> {
+
+      const headers: Headers = new Headers()
+      headers.set('Content-Type', 'application/json')
+      const url = "http://127.0.0.1:8080/workout/getWeekAll"
+    
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: headers,
+        })
+
+        const data = await response.json()
+        console.log(response)
+        console.log(data)
+        return data
+      } catch (error) {
+        console.log(error)
+      }
+  }
+
+  var [weekList, setWeekList] = useState<{}>({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      
+      weekList = await getWeekdays();
+      console.log('Week List:', weekList);  // Check if data is being fetched correctly
+
+      setWeekList(weekList);
+    };
+
+    fetchData(); 
+  }, []); 
+  const weekListString = JSON.parse(JSON.stringify(weekList));
+  console.log(weekListString)
+
+
+  function weekdaysEdit () {
+    <Link href={{pathname:"/weekdaysEdit" }} style={styles.link}>
+          go
+    </Link>
+  }
+  function splitPage (split: String) {
+    <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.link}>
+      {split}
+    </Link>
+  }
+
   return (
     <View
       style={{
@@ -14,8 +63,54 @@ export default function Weekdays() {
       }}
     >
       <Text>WEEKDAYS SCREEN</Text>
+      <Text>Sunday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["sunday"]}
+      </Link>
+      <Text>Monday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["monday"]}
+      </Link>
+      <Text>Tuesday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["tuesday"]}
+      </Link>
+      <Text>Wednesday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["wednesday"]}
+      </Link>
+      <Text>Thursday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["thursday"]}
+      </Link>
+      <Text>Friday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["friday"]}
+      </Link>
+      <Text>Saturday</Text>
+      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+        {weekListString["saturday"]}
+      </Link>
       
       
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  link: {
+    paddingTop: 20,
+    fontSize: 20,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+  },
+});

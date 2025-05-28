@@ -398,8 +398,16 @@ public class WorkoutService {
                             sendResponse(exchange, e.getMessage(), 409);
                             e.printStackTrace();
                         }
-                    }
-                    else {
+                    } else if (command.equals("getWeekAll")) {
+                        try {
+                            JSONObject weekLst = getWeekAll(exchange);
+
+                            sendResponse(exchange, weekLst.toString(), 200);
+                        } catch (SQLException | IOException e) {
+                            sendResponse(exchange, e.getMessage(), 409);
+                            e.printStackTrace();
+                        }
+                    } else {
                         sendResponse(exchange, "Invalid Command", 400);
                     }
                     } else {
@@ -903,6 +911,32 @@ public class WorkoutService {
                     }
                     resultSet.close();
                     return splitName;
+                }
+            } catch (SQLException e) {
+                sendResponse(exchange, e.getMessage(), 409);
+                System.out.println(e.getMessage());
+            }
+            return null;
+        }
+
+        public static JSONObject getWeekAll(HttpExchange exchange) throws SQLException, IOException {
+            // String currentDir = System.getProperty("user.dir");
+            // String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
+
+            String query = "SELECT * FROM schedule";
+
+            try (Connection con = DriverManager.getConnection(path)) {
+                if (con != null) {
+                    var pstmt = con.prepareStatement(query);
+                    
+                    ResultSet resultSet = pstmt.executeQuery();
+                    JSONObject weekLst = new JSONObject();
+                    while (resultSet.next()) {
+                        weekLst.put(resultSet.getString("weekday"), resultSet.getString("splitName"));
+
+                    }
+                    resultSet.close();
+                    return weekLst;
                 }
             } catch (SQLException e) {
                 sendResponse(exchange, e.getMessage(), 409);

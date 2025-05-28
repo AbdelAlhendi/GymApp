@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
 import { Link, useLocalSearchParams } from "expo-router";
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useRoute} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { navigate } from "expo-router/build/global-state/routing";
 import {
@@ -16,6 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export var splitList: Record<string, [number, string]> = {};
 export var workoutUpdate = "";
+// export var splitListReturn: Record<string, [number, string]> = {};
 
 
 
@@ -105,13 +106,16 @@ export default function SplitEdit() {
       } catch (error) {
         console.log(error)
       }
-    } 
+    } else {
+      return {}
+    }
   }
 
 //   const [weight, setWeight] = useState<number | null>(null);
 //   const [notes, setNotes] = useState<string>("");
   var [splitList, setSplitList] = useState<Record<string, [number, string]>>({});
 var {split} = useLocalSearchParams();
+
   useEffect(() => {
     const fetchData = async () => {
       
@@ -127,9 +131,12 @@ var {split} = useLocalSearchParams();
 
 
   console.log(splitList)
+  
+  // console.log(splitListReturn)
   const [splitName, onChangeText1] = React.useState(split);
   var [workoutUpdate, setWorkoutUpdate] = React.useState("");
-
+// const route = useRoute();
+// var splitListReturn = route.params?.splitList2
 
 
   return (
@@ -171,11 +178,11 @@ var {split} = useLocalSearchParams();
           
 
 
-    <Link href="/splitEditModal" style={styles.link}>
-        Add a workout
+    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={styles.link}>
+      Add a Workout
     </Link>
+
     <Button
-      
       title="save"
       color="#007AFF"
       onPress={() => {

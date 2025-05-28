@@ -66,6 +66,15 @@ export default function HomeLayout() {
 
       }}
       />
+    <Tabs.Screen
+      name="weekdaysEdit"
+      options={{
+        title: 'WeekdaysEdit',
+        headerShown: false,
+        href: null
+
+      }}
+      />
       <Tabs.Screen
       name="splits"
       options={{
