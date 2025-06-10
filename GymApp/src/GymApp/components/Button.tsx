@@ -17,7 +17,7 @@ export default function Button({ label }: Props) {
           style={[styles.button, { backgroundColor: '#fff' }]}
           >
           {/* <FontAwesome name="picture-o" size={18} color="#25292e" style={styles.buttonContainer} /> */}
-          <Text style={[styles.buttonLabel, { color: '#25292e' }]}>{label}</Text>
+          <Text style={[styles.buttonLabel, { color: '#461204' }]}>{label}</Text>
         </Pressable>
       </View>
   );

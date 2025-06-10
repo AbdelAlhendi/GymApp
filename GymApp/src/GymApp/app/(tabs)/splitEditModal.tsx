@@ -172,19 +172,15 @@ console.log(splitName)
       <Text>Workouts</Text>
       {Object.entries(workoutData).map(([workout, [weight, notes]], index) => (
         <View key={index} style={{ marginVertical: 8 }}>
-          {/* <Text> {workout} - {weight} ({notes})</Text> */}
           <Button
             title={`${workout} - ${weight} (${notes})`}
             color="#007AFF"
             
             onPress={() => {
-              // splitList.push(workout)
               splitList[workout] = [weight, notes];
               setSplitList(splitList)
               console.log(splitList)
-              
-              // setModalVisible(false)
-            }}
+                          }}
           />
         </View>
       ))}
@@ -200,7 +196,6 @@ console.log(splitName)
       back
       </Link>
     </View>
-    // </Modal>
   );
 }
 

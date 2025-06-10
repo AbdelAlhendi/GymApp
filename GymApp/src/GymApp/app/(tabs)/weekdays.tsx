@@ -43,17 +43,6 @@ export default function Weekdays() {
   console.log(weekListString)
 
 
-  function weekdaysEdit () {
-    <Link href={{pathname:"/weekdaysEdit" }} style={styles.link}>
-          go
-    </Link>
-  }
-  function splitPage (split: String) {
-    <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.link}>
-      {split}
-    </Link>
-  }
-
   return (
     <View
       style={{
@@ -64,31 +53,31 @@ export default function Weekdays() {
     >
       <Text>WEEKDAYS SCREEN</Text>
       <Text>Sunday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "sunday" } }} style={styles.link}>
         {weekListString["sunday"]}
       </Link>
       <Text>Monday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "monday" } }} style={styles.link}>
         {weekListString["monday"]}
       </Link>
       <Text>Tuesday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "tuesday" } }} style={styles.link}>
         {weekListString["tuesday"]}
       </Link>
       <Text>Wednesday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "wednesday" } }} style={styles.link}>
         {weekListString["wednesday"]}
       </Link>
       <Text>Thursday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "thursday" } }} style={styles.link}>
         {weekListString["thursday"]}
       </Link>
       <Text>Friday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "friday" } }} style={styles.link}>
         {weekListString["friday"]}
       </Link>
       <Text>Saturday</Text>
-      <Link href={{pathname:"/weekdaysEdit"}} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "saturday" } }} style={styles.link}>
         {weekListString["saturday"]}
       </Link>
       

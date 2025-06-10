@@ -1,18 +1,4 @@
-// import { Tabs } from 'expo-router';
-// import React from 'react';
-// import { Stack } from 'expo-router/stack';
 
-// export default function TabLayout() {
-//   return (
-//     <Tabs>
-//       <Tabs.Screen name="(home)" options={{ headerShown: false }} />
-//       {/* <Tabs.Screen name="(workouts)" options={{ headerShown: false }} /> */}
-//     </Tabs>
-  
-    
-//   );
-  
-// }
 import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -29,10 +15,10 @@ export default function HomeLayout() {
   return (
     
 
-
-    <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }} >
+    <Tabs screenOptions={{ tabBarActiveTintColor: 'black', tabBarInactiveTintColor: "red",  tabBarInactiveBackgroundColor: "black", tabBarActiveBackgroundColor: "red"}}  >
     <Tabs.Screen
       name="index"
+      
       options={{
         title: 'Home',
         headerShown: false,

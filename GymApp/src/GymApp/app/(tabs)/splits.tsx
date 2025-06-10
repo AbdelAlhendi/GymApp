@@ -14,9 +14,6 @@ export default function Splits( ) {
     const navigation = useNavigation();
   
         async function getSplits(): Promise<any> {
-          //Promise<(number | string)[]
-          // var json = {"command" : "Workout",
-          //   "workouts" : "ShoulderPress"}
         
           const headers: Headers = new Headers()
           headers.set('Content-Type', 'application/json')
@@ -27,7 +24,6 @@ export default function Splits( ) {
           const response = await fetch(url, {
             method: "GET",
             headers: headers,
-            // body: JSON.stringify(json)
           })
       
       
@@ -37,60 +33,40 @@ export default function Splits( ) {
           console.log(response)
           console.log(data)
           return data
-          // }
         } catch (error) {
           console.log(error)
         }
       
-      
           
         }
-      
-      //   const [weight, setWeight] = useState<number | null>(null);
-      //   const [notes, setNotes] = useState<string>("");
+
         const [splitData, setSplitData] = useState<Array<String>>(Array<String>);
       
         useEffect(() => {
           const fetchData = async () => {
             const splitData = await getSplits();
             console.log('Split Data:', splitData);  // Check if data is being fetched correctly
-            
-          //   for (let i = 0; i < workoutData.length(); i++) {
-              
-          //   }
+
             setSplitData(splitData);
             
-      
-            //const [weight, notes] = workoutData;
-      
-            //console.log('Fetched Weight:', weight);
-            //console.log('Fetched Notes:', notes);
-      
-            // Set state with the fetched values
-            //setWeight(weight);
-            //setNotes(notes);
           };
       
           fetchData(); 
         }, []); 
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={styles.container}
     >
-    <Text>Splits</Text>
+    <Text style={styles.title}>Splits</Text>
     {splitData.map((split, index) => (
             <View key={index} style={{ marginVertical: 8 }}>
 
-              <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.link}>
+              <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.button}>
                    {split}
               </Link>
             </View>
           ))}
-    <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.link}> Add a new Split </Link>
+    <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
       
     </View>
   );
@@ -99,8 +75,32 @@ export default function Splits( ) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  button: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 4,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  title: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 10,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 30,
   },
   link: {
     paddingTop: 20,
