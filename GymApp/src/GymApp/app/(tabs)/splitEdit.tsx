@@ -83,6 +83,7 @@ export default function SplitEdit() {
     console.log(split)
 
     if (split != "Split Name") {
+      console.log(split)
       
       const headers: Headers = new Headers()
       headers.set('Content-Type', 'application/json')
@@ -111,10 +112,9 @@ export default function SplitEdit() {
     }
   }
 
-//   const [weight, setWeight] = useState<number | null>(null);
-//   const [notes, setNotes] = useState<string>("");
+
   var [splitList, setSplitList] = useState<Record<string, [number, string]>>({});
-var {split} = useLocalSearchParams();
+  var {split} = useLocalSearchParams();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,23 +132,13 @@ var {split} = useLocalSearchParams();
 
   console.log(splitList)
   
-  // console.log(splitListReturn)
   const [splitName, onChangeText1] = React.useState(split);
   var [workoutUpdate, setWorkoutUpdate] = React.useState("");
-// const route = useRoute();
-// var splitListReturn = route.params?.splitList2
-
 
   return (
     
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-    <Text>SPLITS EDIT SCREEN</Text>
+    <View style={styles.container}>
+    <Text style={styles.title}>SPLITS EDIT SCREEN</Text>
     <TextInput
           style={styles.input}
           onChangeText={onChangeText1}
@@ -157,7 +147,7 @@ var {split} = useLocalSearchParams();
     {Object.entries(splitList).map(([workout, [weight, notes]], index) => (
             <View key={index} style={{ marginVertical: 8 }}>
 
-                <Link href={{pathname:"/splitValueEditModal", params: {workoutName : workout, weight: weight, notes: notes} }} style={styles.link}>
+                <Link href={{pathname:"/splitValueEditModal", params: {workoutName : workout, weight: weight, notes: notes} }} style={styles.button}>
                   {`${workout} - ${weight}  ${notes}`}
                 </Link>
 
@@ -178,13 +168,13 @@ var {split} = useLocalSearchParams();
           
 
 
-    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={styles.link}>
+    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={styles.button}>
       Add a Workout
     </Link>
 
     <Button
       title="save"
-      color="#007AFF"
+      color="#f90202"
       onPress={() => {
         postSplit(String(splitName), String(split))
         console.log(splitList)
@@ -200,9 +190,41 @@ var {split} = useLocalSearchParams();
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
     alignItems: 'center',
-    justifyContent: 'center',
   },
+  button: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 4,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  title: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 10,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 30,
+  },
+  imageContainer: {
+    flex: 1,
+    paddingTop: 28,
+  },
+  footerContainer: {
+    flex: 1 / 3,
+    alignItems: 'center',
+  },  
   link: {
     paddingTop: 20,
     fontSize: 20,
@@ -210,8 +232,11 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     margin: 12,
-    borderWidth: 1,
+    borderWidth: 5,
     padding: 10,
+    color: '#FFFFFF',
+    backgroundColor: '#000000',
+    borderColor: '#f90202'
   },
 });
 

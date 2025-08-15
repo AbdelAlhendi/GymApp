@@ -10,7 +10,7 @@ export default function Tab() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#000000',
     alignItems: 'center',
@@ -38,5 +38,26 @@ const styles = StyleSheet.create({
     color: '#FFF',
     textAlign: 'center',
     fontSize: 30,
+  },
+  imageContainer: {
+    flex: 1,
+    paddingTop: 28,
+  },
+  footerContainer: {
+    flex: 1 / 3,
+    alignItems: 'center',
+  },  
+  link: {
+    paddingTop: 20,
+    fontSize: 20,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 5,
+    padding: 10,
+    color: '#FFFFFF',
+    backgroundColor: '#000000',
+    borderColor: '#f90202'
   },
 });

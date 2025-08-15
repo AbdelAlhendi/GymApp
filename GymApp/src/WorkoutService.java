@@ -31,6 +31,7 @@ import java.sql.*;
 public class WorkoutService {
     private static String currentDir = System.getProperty("user.dir");
     private static String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
+    private static String path2 = "jdbc:sqlite:" + currentDir + "GymApp/sqlite/db/workoutDB.db";
         public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
         int port = 8082;
         // System.out.println("Server started on port " + port);
@@ -39,6 +40,12 @@ public class WorkoutService {
 
         server.setExecutor(Executors.newFixedThreadPool(20)); 
 
+        try {
+            Connection conTest = DriverManager.getConnection(path);
+        } catch (SQLException e) {
+            System.out.println("Incorrect sql file path, switching");
+            path = "jdbc:sqlite:" + currentDir + "/GymApp/sqlite/db/workoutDB.db";
+        }
         
         if (connect() == null) {
             createNewDatabase();
@@ -456,6 +463,7 @@ public class WorkoutService {
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
+                
             }
         }
 
@@ -474,6 +482,8 @@ public class WorkoutService {
                 con = DriverManager.getConnection(path);
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
+                
+                
             }
             return con;
         }

@@ -1,1 +1,1 @@
-{"command": "commandTest", "workouts": "splitTest", "workoutJSON": {"Shoulders": {"ShoulderPress": 10}}}
+{"command": "postWeek", "week": {"sunday": "null"}}

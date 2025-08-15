@@ -45,39 +45,35 @@ export default function Weekdays() {
 
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={styles.container}
     >
-      <Text>WEEKDAYS SCREEN</Text>
+      <Text style={styles.title}>WEEKDAYS SCREEN</Text>
       <Text>Sunday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "sunday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "sunday" } }} style={styles.button}>
         {weekListString["sunday"]}
       </Link>
       <Text>Monday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "monday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "monday" } }} style={styles.button}>
         {weekListString["monday"]}
       </Link>
       <Text>Tuesday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "tuesday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "tuesday" } }} style={styles.button}>
         {weekListString["tuesday"]}
       </Link>
       <Text>Wednesday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "wednesday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "wednesday" } }} style={styles.button}>
         {weekListString["wednesday"]}
       </Link>
       <Text>Thursday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "thursday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "thursday" } }} style={styles.button}>
         {weekListString["thursday"]}
       </Link>
       <Text>Friday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "friday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "friday" } }} style={styles.button}>
         {weekListString["friday"]}
       </Link>
       <Text>Saturday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "saturday" } }} style={styles.link}>
+      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "saturday" } }} style={styles.button}>
         {weekListString["saturday"]}
       </Link>
       
@@ -89,9 +85,41 @@ export default function Weekdays() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
     alignItems: 'center',
-    justifyContent: 'center',
   },
+  button: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 4,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  title: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 10,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 30,
+  },
+  imageContainer: {
+    flex: 1,
+    paddingTop: 28,
+  },
+  footerContainer: {
+    flex: 1 / 3,
+    alignItems: 'center',
+  },  
   link: {
     paddingTop: 20,
     fontSize: 20,
@@ -99,7 +127,10 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     margin: 12,
-    borderWidth: 1,
+    borderWidth: 5,
     padding: 10,
+    color: '#FFFFFF',
+    backgroundColor: '#000000',
+    borderColor: '#f90202'
   },
 });

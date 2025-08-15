@@ -80,6 +80,8 @@ export default function HomeLayout() {
           options={{
             title: 'SplitEdit',
             headerShown: false,
+            headerTintColor: "f90202"
+            
           }}
         />
         <Stack.Screen

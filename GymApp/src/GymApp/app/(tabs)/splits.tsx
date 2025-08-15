@@ -12,6 +12,34 @@ import {
 
 export default function Splits( ) {
     const navigation = useNavigation();
+
+    async function deleteSplit(split: string): Promise<(any)> {
+    
+        var json = {command : "deleteSplit",
+            splitName : split}
+        
+        const headers: Headers = new Headers()
+        headers.set('Content-Type', 'application/json')
+        const url = "http://127.0.0.1:8080/workout"
+      
+  
+          try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(json)
+          })
+  
+          
+          
+          const data = await response.json()
+          console.log(response)
+          console.log(data)
+          return "Split deleted successfully!"
+        } catch (error) {
+          console.log(error)
+        }
+      }
   
         async function getSplits(): Promise<any> {
         
@@ -40,15 +68,19 @@ export default function Splits( ) {
           
         }
 
-        const [splitData, setSplitData] = useState<Array<String>>(Array<String>);
+        var [splitData, setSplitData] = useState<Array<String>>(Array<String>);
       
         useEffect(() => {
           const fetchData = async () => {
-            const splitData = await getSplits();
+            var splitData = await getSplits();
             console.log('Split Data:', splitData);  // Check if data is being fetched correctly
 
             setSplitData(splitData);
-            
+            if (splitData == undefined) {
+              splitData = [""];
+              setSplitData(splitData);
+            }
+
           };
       
           fetchData(); 
@@ -64,6 +96,15 @@ export default function Splits( ) {
               <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.button}>
                    {split}
               </Link>
+              <Button
+                title={"Delete"}
+                color="#e43404"
+                  onPress={() => {
+                    
+                    deleteSplit(String(split))
+                    console.log(split)
+                  }}
+              />
             </View>
           ))}
     <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
