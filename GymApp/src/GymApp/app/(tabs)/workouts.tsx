@@ -2,74 +2,38 @@ import React from "react";
 import { Text, View, StyleSheet, TextInput, Button } from "react-native";
 // import Button from '@/components/Button';
 import { Link } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 
 
 export default function Workouts() {
-  async function postWorkout(workoutName: string, weight: number, notes: string): Promise<(any)> {
-
-    var json = {command : "putWorkout",
-                workouts: {[workoutName] : [weight, notes]}
-    }
-    console.log(json)
-    
-    
   
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout"
-   
+  const database = useSQLiteContext();
 
+  const postWorkout = async (workoutVar: string, weightVar: number, notesVar: string) => {
     try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(json)
-    })
-
-    
-    
-    const data = await response.json()
-    // console.log(response)
-    console.log(data)
-    return "Workout updated successfully!"
-  } catch (error) {
-    console.log(error)
-  }
-
-
-    
-  }
-
-  async function addWorkout(workoutName: string, weight: number, notes: string): Promise<(any)> {
-
-    var json = {command : "postWorkout",
-                workouts: {[workoutName] : [weight, notes]}
+      const query = "INSERT INTO workouts(workout,weight,notes) VALUES(?,?,?)";
+      database.runAsync(query, [
+        workoutVar,
+        weightVar,
+        notesVar,
+      ]);
+    } catch (error) {
+      console.error(error)
     }
-    console.log(json)
-  
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout"
-   
+  };
 
+  const putWorkout = async (workoutVar: string, weightVar: number, notesVar: string) => {
     try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(json)
-    })
-
-    
-    
-    const data = await response.json()
-    // console.log(response)
-    console.log(data)
-    return "Workout added successfully!"
-  } catch (error) {
-    console.log(error)
-  }
-
-  }
+      const query = "UPDATE workouts SET weight = ?, notes = ? WHERE workout = ?";
+      database.runAsync(query, [
+        weightVar,
+        notesVar,
+        workoutVar,
+      ]);
+    } catch (error) {
+      console.error(error)
+    }
+  };
 
   var [weightVar, onChangeText2] = React.useState(Number(0));
   var [notesVar, onChangeText3] = React.useState("");
@@ -89,7 +53,6 @@ export default function Workouts() {
               value={String(workoutVar)}
               
           />
-            {/* <Text>{workoutName}</Text> */}
           <TextInput
               style={styles.input}
               placeholder={String(weightVar)}
@@ -107,7 +70,7 @@ export default function Workouts() {
           color='#f90202'
               onPress={() => {
               
-              postWorkout(String(workoutVar), weightVar, notesVar)
+              putWorkout(String(workoutVar), weightVar, notesVar)
       
               }}
           />
@@ -115,9 +78,7 @@ export default function Workouts() {
           title={"Add Workout"}
           color='#f90202'
               onPress={() => {
-              // splitList[String(workoutName)] = [weightVar, notesVar]
-              // console.log(splitList)
-              addWorkout(String(workoutVar), weightVar, notesVar)
+              postWorkout(String(workoutVar), weightVar, notesVar)
               
       
               }}

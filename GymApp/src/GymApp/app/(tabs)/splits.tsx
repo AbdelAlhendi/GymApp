@@ -1,113 +1,88 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 // import Button from '@/components/Button';
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { useState, useEffect } from "react";
 import {
   createStaticNavigation,
   useNavigation,
 } from '@react-navigation/native';
+import * as SQLite from 'expo-sqlite';
+import { FlatList } from "react-native";
 
+
+type Splits = {workoutLst: String, workout1: String, workout2: String, workout3: String, workout4: String, workout5: String,
+workout6: String, workout7: String, workout8: String, workout9: String, workout10: String};
 
 
 export default function Splits( ) {
-    const navigation = useNavigation();
 
-    async function deleteSplit(split: string): Promise<(any)> {
+    const database = SQLite.useSQLiteContext();
+
+    const deleteSplit = async (splitName: string) => {
+    try {
+      const query1 = "DELETE FROM splits WHERE splitName = ?";
+
+      const query2 = "DELETE FROM workoutLsts WHERE workoutLst = ?";
+      database.runAsync(query1, [
+        splitName,
+      ]);
+
+      database.runAsync(query2, [
+        splitName,
+      ]);
+
+    } catch (error) {
+      console.error(error)
+    }
+  };
+      const [splits, setData] = useState<Splits[]>([]);
     
-        var json = {command : "deleteSplit",
-            splitName : split}
-        
-        const headers: Headers = new Headers()
-        headers.set('Content-Type', 'application/json')
-        const url = "http://127.0.0.1:8080/workout"
       
-  
-          try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify(json)
-          })
-  
-          
-          
-          const data = await response.json()
-          console.log(response)
-          console.log(data)
-          return "Split deleted successfully!"
-        } catch (error) {
-          console.log(error)
-        }
-      }
-  
-        async function getSplits(): Promise<any> {
-        
-          const headers: Headers = new Headers()
-          headers.set('Content-Type', 'application/json')
-          const url = "http://127.0.0.1:8080/workout/getSplitAll"
-         
-      
-          try {
-          const response = await fetch(url, {
-            method: "GET",
-            headers: headers,
-          })
-      
-      
-          
-          
-          const data = await response.json()
-          console.log(response)
-          console.log(data)
-          return data
-        } catch (error) {
-          console.log(error)
-        }
-      
-          
-        }
+    
+      const loadSplits = async () => {
+        const result = await database.getAllAsync<Splits>("SELECT * FROM workoutLsts;");
+        setData(result);
+      };
+    
+      useFocusEffect(
+        useCallback(() => {
+          loadSplits();
+        }, [])
+      );
 
-        var [splitData, setSplitData] = useState<Array<String>>(Array<String>);
-      
-        useEffect(() => {
-          const fetchData = async () => {
-            var splitData = await getSplits();
-            console.log('Split Data:', splitData);  // Check if data is being fetched correctly
-
-            setSplitData(splitData);
-            if (splitData == undefined) {
-              splitData = [""];
-              setSplitData(splitData);
-            }
-
-          };
-      
-          fetchData(); 
-        }, []); 
   return (
-    <View
-      style={styles.container}
-    >
-    <Text style={styles.title}>Splits</Text>
-    {splitData.map((split, index) => (
-            <View key={index} style={{ marginVertical: 8 }}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Splits</Text>
+      <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
 
-              <Link href={{pathname:"/splitEdit", params: {split : String(split)} }} style={styles.button}>
-                   {split}
+      <View>
+        <FlatList 
+          data={splits} 
+          renderItem={({ item }) => {
+            return (
+            <View>
+
+              <Link href={{pathname:"/splitEdit", params: {split : String(item.workoutLst)} }} style={styles.button}>
+                    {String(item.workoutLst)}
               </Link>
+
               <Button
-                title={"Delete"}
-                color="#e43404"
-                  onPress={() => {
-                    
-                    deleteSplit(String(split))
-                    console.log(split)
-                  }}
-              />
+                  title={"Delete"}
+                  color="#e43404"
+                    onPress={() => {
+                      
+                      deleteSplit(String(item.workoutLst))
+                      console.log(String(item.workoutLst) + "has been deleted")
+                    }}
+                />
             </View>
-          ))}
-    <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
+          );
+        }}
+        />
+      </View>
+
+      <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
       
     </View>
   );
