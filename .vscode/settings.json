@@ -14,6 +14,18 @@
         "c:\\Users\\TOPMAN\\Personal Coding Projects\\GymApp\\GymApp\\lib\\slf4j-api-1.7.36.jar",
         "c:\\Users\\TOPMAN\\Personal Coding Projects\\GymApp\\GymApp\\lib\\mongodb-driver-sync-5.0.0-beta0.jar",
         "c:\\Users\\TOPMAN\\Personal Coding Projects\\GymApp\\GymApp\\lib\\jackson-annotations-2.16.1.jar",
-        "c:\\Users\\TOPMAN\\Personal Coding Projects\\GymApp\\GymApp\\lib\\jackson-core-2.16.1.jar"
+        "c:\\Users\\TOPMAN\\Personal Coding Projects\\GymApp\\GymApp\\lib\\jackson-core-2.16.1.jar",
+        "GymApp/lib/activation.jar",
+        "GymApp/lib/bson-5.0.0-beta0.jar",
+        "GymApp/lib/jackson-annotations-2.16.1.jar",
+        "GymApp/lib/jackson-core-2.16.1.jar",
+        "GymApp/lib/jackson-databind-2.16.1.jar",
+        "GymApp/lib/javax.mail.jar",
+        "GymApp/lib/json-20140107.jar",
+        "GymApp/lib/mongodb-driver-core-5.0.0-beta0.jar",
+        "GymApp/lib/mongodb-driver-sync-5.0.0-beta0.jar",
+        "GymApp/lib/slf4j-api-1.7.36.jar",
+        "GymApp/lib/slf4j-simple-1.7.36.jar",
+        "GymApp/lib/sqlite-jdbc-3.45.0.0.jar"
     ]
 }

@@ -14,12 +14,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 // const Stack = createNativeStackNavigator();
 
-export var splitList: Record<string, [number, string]> = {};
 export var workoutUpdate = "";
-// export var splitListReturn: Record<string, [number, string]> = {};
 import * as SQLite from 'expo-sqlite';
 import { FlatList } from "react-native";
-import Index from ".";
 
 
 type Splits = {workoutLst: String, workout1: String, workout2: String, workout3: String, workout4: String, workout5: String,
@@ -31,153 +28,56 @@ type Workouts = { workout: string, weight: number, notes: string};
 
 
 export default function SplitEdit() {
-  // const navigation = useNavigation();
-
-  // async function postSplit(splitName: string, splitCheck : String): Promise<(any)> {
-
-  //   if (Object.keys(splitList).length == 0) {
-  //     return "No workouts in split."
-  //   } else {
-
-  //     var workoutLst = []
-  //     for (let i = 0; i < Object.keys(splitList).length; i++) {
-  //       workoutLst.push(Object.keys(splitList).at(i))
-  //     }
-  //     console.log("workoutLst:" + workoutLst)
-
-  //     console.log("split Check: " + splitCheck)
-      
-  //     if (splitCheck == "Split Name") { // new split
-  //       var json = {command : "postSplit",
-  //           splitName : {[splitName] : workoutLst}
-  //       }
-  //     } else { // updating already existing split
-  //       var json = {command : "putSplit",
-  //           splitName : {[splitName] : workoutLst}
-  //       }
-  //     }
-
-  //     console.log(json)
-      
-      
-    
-  //     const headers: Headers = new Headers()
-  //     headers.set('Content-Type', 'application/json')
-  //     const url = "http://127.0.0.1:8080/workout"
-    
-
-  //       try {
-  //       const response = await fetch(url, {
-  //         method: "POST",
-  //         headers: headers,
-  //         body: JSON.stringify(json)
-  //       })
-
-        
-        
-  //       const data = await response.json()
-  //       console.log(response)
-  //       console.log(data)
-  //       return "Split added successfully!"
-  //     } catch (error) {
-  //       console.log(error)
-  //     }
-
-
-      
-  //   }
-  // }
-
-  // async function getSplits(split: String): Promise<any> {
-    
-  //   console.log(split)
-
-  //   if (split != "Split Name") {
-  //     console.log(split)
-      
-  //     const headers: Headers = new Headers()
-  //     headers.set('Content-Type', 'application/json')
-  //     const url = "http://127.0.0.1:8080/workout/getSplit/" + split
-  //     // console.log(url)
-    
-
-  //     try {
-  //       const response = await fetch(url, {
-  //         method: "GET",
-  //         headers: headers,
-  //       })
-
-
-        
-        
-  //       const data = await response.json()
-  //       console.log(response)
-  //       console.log(data)
-  //       return data
-  //     } catch (error) {
-  //       console.log(error)
-  //     }
-  //   } else {
-  //     return {}
-  //   }
-  // }
-
-
-  
-
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-      
-  //     splitList = await getSplits(String(split));
-  //     console.log('Split List:', splitList);  // Check if data is being fetched correctly
-
-  //     setSplitList(splitList);
-      
-  //   };
-
-  //   fetchData(); 
-  // }, []); 
-
-
-  // console.log(splitList)
 
   const database = SQLite.useSQLiteContext();
   var {split} = useLocalSearchParams();
-  
+
   var [splitName, onChangeText1] = React.useState(split);
 
 
-  const [splits, setData] = useState<Splits[]>([]);
+  var [splits, setData] = useState<Splits>();
 
 
-  const loadSplit = async (splitName: String) => {
+  const loadSplit = async () => {
+    try {
+      console.log("splitName: " + splitName)
 
-    const result = await database.getAllAsync<Splits>("SELECT workout1, workout2, workout3, workout4, workout5,"
-            + " workout6, workout7, workout8, workout9, workout10 FROM workoutLsts WHERE workoutLst = ?", [
-              String(splitName),
-            ]);
+      const result = await database.getAllAsync<Splits>("SELECT workout1, workout2, workout3, workout4, workout5,"
+              + " workout6, workout7, workout8, workout9, workout10 FROM workoutLsts WHERE workoutLst = ?", [
+                String(splitName),
+              ]);
 
-  
-    setData(result);
+      splits = result.at(0)
+      setData(splits);
+      console.log(splits)
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   useFocusEffect(
     useCallback(() => {
-      loadSplit(String(splitName));
+      loadSplit();
     }, [])
   );
 
-  
+    
 
-  var [splitList, setSplitList] = useState<Record<string, [number, string]>>({});
   var [splitList2, setSplitList2] = useState<Workouts[]>([]);
-  var [workoutData, setWorkout] = useState<Workouts>();
 
   const loadWorkout = async () => {
+    if (!splits && splitName != "Split Name") {
+      console.log("splits not loaded yet: " + splits)
+      return;
+    }
     try {
+      for (var l = 0; l < splitList2.length; l++) {
+        splitList2.pop()
+      }
+      splitList2.pop()
+      console.log("Emptied: " + splitList2)
 
-      const splitParsed = splits.at(0);
+      const splitParsed = splits;
       // fucking hell bro
       var  result = await database.getAllAsync<Workouts>("SELECT * FROM workouts WHERE workout = ?", [
         String(splitParsed?.workout1),
@@ -266,26 +166,32 @@ export default function SplitEdit() {
     }
     
     };
-  
-    useFocusEffect(
-      useCallback(() => {
-        loadWorkout();
-      }, [])
-    );
+
+  useEffect(() => {
+    if (splits) {
+      loadWorkout();
+    }
+  }, [splits]);
 
 
   const updateSplit = async () => {
     try {
       var workoutsToUpdateList = [];
-      workoutsToUpdateList.push(String(splits.at(0)?.workoutLst))
-      for (var i = 0; i < splitList2.length; i++) {
-        workoutsToUpdateList.push(String(splitList2.at(i)?.workout))
+      for (var i = 0; i < 10; i++) {
+        if (splitList2.at(i) == undefined || String(splitList2.at(i)) == "undefined" || splitList2.at(i) == null) {
+          workoutsToUpdateList.push(null)
+        } else {
+          workoutsToUpdateList.push(String(splitList2.at(i)?.workout))
+        }
       }
-      
+          workoutsToUpdateList.push(String(splitName))
+          console.log("workoutsToUpdateList: " + workoutsToUpdateList)
 
-      const query = "UPDATE workoutLsts SET workout1 = ?, workout2 = ?, workout3 = ?, workout4 = ?,"
-            + " workout5 = ?, workout6 = ?, workout7 = ?, workout8 = ?, workout9 = ?, workout10 = ? WHERE workoutLst = ?"
-      database.runAsync(query, workoutsToUpdateList);
+          const query = "UPDATE workoutLsts SET workout1 = ?, workout2 = ?, workout3 = ?, workout4 = ?,"
+                + " workout5 = ?, workout6 = ?, workout7 = ?, workout8 = ?, workout9 = ?, workout10 = ? WHERE workoutLst = ?"
+          database.runAsync(query, workoutsToUpdateList);
+        
+      
 
     } catch (error) {
       console.error(error)
@@ -321,12 +227,13 @@ export default function SplitEdit() {
                   onPress={() => {
                     for (var i = 0; i < splitList2.length; i++) {
                       if (item.workout == splitList2.at(i)?.workout) {
-                        splitList2 = splitList2.splice(i, 1)
+                        
+                        splitList2.splice(i, 1)
                         break;
                       }
                     }
                     setSplitList2(splitList2)
-                    console.log(splitList2)
+                    console.log("splitList2 after deletion: " +splitList2)
                     updateSplit();
                   }}
               />

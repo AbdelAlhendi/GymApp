@@ -2,88 +2,37 @@ import { StyleSheet, Text, View, Button, Modal, Alert, TextInput } from 'react-n
 import { Link, router, useLocalSearchParams} from 'expo-router';
 import React, { useState, useEffect } from "react";
 
-import {splitList} from './splitEdit';
-import { goBack } from 'expo-router/build/global-state/routing';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import { navigate } from "expo-router/build/global-state/routing";
+
+import * as SQLite from 'expo-sqlite';
+import { FlatList } from "react-native";
 
 
+type Workouts = { workout: string, weight: number, notes: string};
 
 export default function splitValueEditModal() {
 
-async function postWorkout(workoutName: string, weight: number, notes: string): Promise<(any)> {
+  const database = SQLite.useSQLiteContext();
 
-    var json = {command : "putWorkout",
-                workouts: {[workoutName] : [weight, notes]}
-    }
-    console.log(json)
-    
-    
-  
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout"
-   
+  var { workoutName } = useLocalSearchParams();
+  var {weight} = useLocalSearchParams();
+  var {notes} = useLocalSearchParams();
 
+  const updateWorkout = async () => {
     try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(json)
-    })
-
-    
-    
-    const data = await response.json()
-    // console.log(response)
-    console.log(data)
-    return "Workout updated successfully!"
-  } catch (error) {
-    console.log(error)
-  }
-
-
-    
-  }
-
-  async function addWorkout(workoutName: string, weight: number, notes: string): Promise<(any)> {
-
-    var json = {command : "postWorkout",
-                workouts: {[workoutName] : [weight, notes]}
+      const query = "UPDATE workouts SET weight = ?, notes = ? WHERE workout = ?"
+      database.runAsync(query, [
+        weightVar,
+        notesVar,
+        workoutVar,
+      ]);
+      console.log("workout updated: " + workoutVar + " - " + weightVar + " - " + notesVar)
+    } catch (error) {
+      console.error(error)
     }
-    console.log(json)
-  
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout"
-   
-
-    try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(json)
-    })
-
-    
-    
-    const data = await response.json()
-    // console.log(response)
-    console.log(data)
-    return "Workout added successfully!"
-  } catch (error) {
-    console.log(error)
-  }
-
-  }
+  };
 
 
-var { workoutName } = useLocalSearchParams();
-var {weight} = useLocalSearchParams();
-var {notes} = useLocalSearchParams();
 const isPresented = router.canGoBack();
-// const [modalVisible, setModalVisible] = useState(true);
 
   var [weightVar, onChangeText2] = React.useState(Number(weight));
   var [notesVar, onChangeText3] = React.useState(String(notes));
@@ -98,7 +47,6 @@ const isPresented = router.canGoBack();
         value={String(workoutVar)}
         
     />
-      {/* <Text>{workoutName}</Text> */}
     <TextInput
         style={styles.input}
         placeholder={String(weight)}
@@ -115,23 +63,9 @@ const isPresented = router.canGoBack();
     title={"Save Weight and Notes"}
     color="#f90202"
         onPress={() => {
-        splitList[String(workoutName)] = [weightVar, notesVar]
-        console.log(splitList)
-        
-        postWorkout(String(workoutVar), weightVar, notesVar)
-
+        updateWorkout();
         }}
     />
-    <Button
-    title={"Add Workout"}
-    color="#f90202"
-        onPress={() => {
-        addWorkout(String(workoutVar), weightVar, notesVar)
-        
-
-        }}
-    />
-
       
       {isPresented && <Link href="../splitEdit">Back</Link>}
     </View>

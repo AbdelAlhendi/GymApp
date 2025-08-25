@@ -1,1 +1,1 @@
-{"command": "getWeek", "week": "tuesday"}
+{"command": "postWorkout", "workouts": {"rest": [0, "Rest"]}}

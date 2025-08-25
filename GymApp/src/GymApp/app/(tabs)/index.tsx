@@ -24,91 +24,53 @@ const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frida
 
 type Workouts = { workout: string, weight: number, notes: string};
 
+type Schedule = {weekday: string, splitName: string}
+
 export default function Index() {
 
-  const [data, setData] = useState<Workouts[]>([]);
+  // const [data, setData] = useState<Workouts[]>([]);
 
   const database = SQLite.useSQLiteContext();
 
-  const loadWorkouts = async () => {
-    const result = await database.getAllAsync<Workouts>("SELECT * FROM workouts;");
-    console.log(result)
-    setData(result);
-    console.log(data)
+  // const loadWorkouts = async () => {
+  //   const result = await database.getAllAsync<Workouts>("SELECT * FROM workouts;");
+  //   console.log(result)
+  //   setData(result);
+  //   // console.log(data)
+  // };
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     loadWorkouts();
+  //   }, [])
+  // );
+
+  var [scheduleData, setSchedule] = useState<Schedule[]>([]);
+  
+
+  const loadSchedule = async () => {
+    const result = await database.getAllAsync<Schedule>("SELECT * FROM schedule WHERE weekday = ?;", 
+      String(weekdays.at(date.getDay()))
+    );
+    setSchedule(result);
+    console.log(scheduleData)
   };
 
   useFocusEffect(
     useCallback(() => {
-      loadWorkouts();
+      loadSchedule();
     }, [])
   );
-
-  // async function getWeekday(): Promise<any> {
-  //   const today = weekdays[date.getDay()]
-
-  //   console.log(today)
-
-  //   const headers: Headers = new Headers()
-  //   headers.set('Content-Type', 'application/json')
-  //   const url = "http://127.0.0.1:8080/workout/getWeek/" + String(today)
-  
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "GET",
-  //       headers: headers,
-  //     })
-
-  //     const data = await response.text()
-  //     console.log(response)
-  //     console.log(data)
-  //     return data
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
-  
-  //   var [weekDay, setWeekDay] = useState<String>("");
-  
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-        
-  //       weekDay = await getWeekday();
-  //       console.log('Week Day:', weekDay);  // Check if data is being fetched correctly
-  
-  //       setWeekDay(weekDay);
-  //     };
-  
-  //     fetchData(); 
-  //   }, []); 
   
 
   return (
-    // <SafeAreaView></SafeAreaView>
       <View style={styles.container}>
 
         <Text style={styles.title}>Today's Workout</Text>
-        <View>
-          <FlatList 
-            data={data} 
-            renderItem={({ item }) => {
-              console.log(item)
-              return (
-              <View>
-                <Text style={styles.button} >{item.workout}</Text>
-                <Text style={styles.button} >{item.weight}</Text>
-                <Text style={styles.button} >{item.notes}</Text>
-              </View>
-            );
-          }}
-          />
-      </View>
-
-
-      
-      {/* <Link href={{pathname:"/splitEdit", params: {weekDay : String(weekDay)} }} style={styles.button}>
-            {weekDay}
-      </Link> */}
+        
+        <Link href={{pathname:"/splitEdit", params: {split : String(scheduleData.at(0)?.splitName)} }} style={styles.button}>
+          {String(scheduleData.at(0)?.splitName)}
+        </Link>
   
       </View>
   );

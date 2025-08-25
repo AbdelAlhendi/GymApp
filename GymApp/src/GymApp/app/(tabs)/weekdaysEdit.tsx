@@ -1,120 +1,82 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useFocusEffect, useLocalSearchParams } from "expo-router";
 
-var splitName = "";
+// var splitName = "";
 
+import * as SQLite from 'expo-sqlite';
+import { FlatList } from "react-native";
+
+
+type Splits = {workoutLst: String, workout1: String, workout2: String, workout3: String, workout4: String, workout5: String,
+workout6: String, workout7: String, workout8: String, workout9: String, workout10: String};
 
 export default function WeekdaysEdit() {
+  const {weekday} = useLocalSearchParams();
 
-  async function postWeek(splitName: string, weekday : string): Promise<(any)> {
 
-    if (splitName == "") {
-      return "No split to add to weekday"
-    } else {
+  const database = SQLite.useSQLiteContext();
 
-      var json = {command : "putWeek",
-                week: {[weekday] : splitName}          
-      }
-      console.log(json)
-    
-      const headers: Headers = new Headers()
-      headers.set('Content-Type', 'application/json')
-      const url = "http://127.0.0.1:8080/workout"
-    
 
-        try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(json)
-        })
-
-  
-        const data = await response.json()
-        console.log(response)
-        console.log(data)
-        return "Weekday updated successfully!"
-      } catch (error) {
-        console.log(error)
-      }   
-    }
+  const putWeekday = async (weekday: string, splitName: string) => {
+  try {
+    console.log(weekday)
+    console.log(splitName)
+    const query = "UPDATE schedule SET splitName = ? WHERE weekday = ?;";
+    database.runAsync(query, [
+      splitName,
+      weekday,
+    ]);
+  } catch (error) {
+    console.error(error)
   }
+};
 
-  async function getSplits(): Promise<any> {
-  
-    const headers: Headers = new Headers()
-    headers.set('Content-Type', 'application/json')
-    const url = "http://127.0.0.1:8080/workout/getSplitAll"
-    
+  const [splits, setData] = useState<Splits[]>([]);
 
-    try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: headers,
-    })
+  const loadSplits = async () => {
 
-    const data = await response.json()
-    console.log(response)
-    console.log(data)
-    return data
-    } catch (error) {
-      console.log(error)
-    }
-  
-  }
+    const result = await database.getAllAsync<Splits>("SELECT * FROM workoutLsts;");
+    setData(result);
+  };
 
-  
-  const [splitData, setSplitData] = useState<Array<String>>(Array<String>);
-  var {weekday} = useLocalSearchParams();
-  console.log(weekday)
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        const splitData = await getSplits();
-        console.log('Split Data:', splitData);  // Check if data is being fetched correctly
-
-        setSplitData(splitData);
-        
-      };
-  
-      fetchData(); 
-    }, []); 
+  useFocusEffect(
+    useCallback(() => {
+      loadSplits();
+    }, [])
+  );
 
 
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={styles.container}
     >
-      <Text>WEEKDAYS EDIT SCREEN</Text>
-      {splitData.map((split, index) => (
-        <View key={index} style={{ marginVertical: 8 }}>
-          <Button
-            title={`${split}`}
-            color="#007AFF"
-            
-            onPress={() => {
-              splitName = String(split)
-            }}
-          />
-        </View>
-      ))}
-      <Button
-        title={"Save"}
-        color="#007AFF"
-        
-        onPress={() => {
-          postWeek(splitName, String(weekday))
-        }}
-      />
+      <Text style={styles.title}>WEEKDAYS EDIT SCREEN</Text>
 
-      <Link href={{pathname:"/weekdays" }} style={styles.link}>
-      back
+      <Link href={{pathname:"/weekdays" }} style={styles.button}>
+        back
       </Link>
+
+      <View>
+        <FlatList 
+          data={splits} 
+          renderItem={({ item }) => {
+            return (
+            <View>
+              <Button
+                title={String(item.workoutLst)}
+                color="#e43404"
+                
+                onPress={() => {
+                  putWeekday(String(weekday), String(item.workoutLst))
+                }}
+              />
+            </View>
+          );
+        }}
+        />
+      </View>
+
     </View>
   );
 }
@@ -122,12 +84,37 @@ export default function WeekdaysEdit() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000000',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  button: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 4,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  title: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 4,
+    borderColor: '#f90202',
+    borderRadius: 10,
+    backgroundColor: '#000000',
+    color: '#FFF',
+    textAlign: 'center',
+    fontSize: 30,
   },
   link: {
     paddingTop: 20,
     fontSize: 20,
+    
   },
   input: {
     height: 40,

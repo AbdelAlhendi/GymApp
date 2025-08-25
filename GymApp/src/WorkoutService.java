@@ -4,22 +4,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.Executors;
-
-import javax.swing.plaf.synth.SynthEditorPaneUI;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.Authenticator.Result;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +21,6 @@ import java.sql.*;
 public class WorkoutService {
     private static String currentDir = System.getProperty("user.dir");
     private static String path = "jdbc:sqlite:" + currentDir + "/sqlite/db/workoutDB.db";
-    private static String path2 = "jdbc:sqlite:" + currentDir + "GymApp/sqlite/db/workoutDB.db";
         public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException {
         int port = 8082;
         // System.out.println("Server started on port " + port);

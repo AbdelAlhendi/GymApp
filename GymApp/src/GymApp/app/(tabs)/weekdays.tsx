@@ -1,82 +1,52 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Alert } from "react-native";
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useFocusEffect, useLocalSearchParams } from "expo-router";
+import * as SQLite from 'expo-sqlite';
+import { FlatList } from "react-native";
 
+
+type Schedule = {weekday: string, splitName: string}
 
 export default function Weekdays() {
-  async function getWeekdays(): Promise<any> {
 
-      const headers: Headers = new Headers()
-      headers.set('Content-Type', 'application/json')
-      const url = "http://127.0.0.1:8080/workout/getWeekAll"
-    
 
-      try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: headers,
-        })
+  const database = SQLite.useSQLiteContext();
+  var [scheduleData, setSchedule] = useState<Schedule[]>([]);
 
-        const data = await response.json()
-        console.log(response)
-        console.log(data)
-        return data
-      } catch (error) {
-        console.log(error)
-      }
-  }
 
-  var [weekList, setWeekList] = useState<{}>({});
+  const loadSchedule = async () => {
+    const result = await database.getAllAsync<Schedule>("SELECT * FROM schedule;");
+    setSchedule(result);
+    console.log(scheduleData)
+  };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      
-      weekList = await getWeekdays();
-      console.log('Week List:', weekList);  // Check if data is being fetched correctly
-
-      setWeekList(weekList);
-    };
-
-    fetchData(); 
-  }, []); 
-  const weekListString = JSON.parse(JSON.stringify(weekList));
-  console.log(weekListString)
+  useFocusEffect(
+    useCallback(() => {
+      loadSchedule();
+    }, [])
+  );
 
 
   return (
     <View
-      style={styles.container}
-    >
+      style={styles.container}>
       <Text style={styles.title}>WEEKDAYS SCREEN</Text>
-      <Text>Sunday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "sunday" } }} style={styles.button}>
-        {weekListString["sunday"]}
-      </Link>
-      <Text>Monday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "monday" } }} style={styles.button}>
-        {weekListString["monday"]}
-      </Link>
-      <Text>Tuesday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "tuesday" } }} style={styles.button}>
-        {weekListString["tuesday"]}
-      </Link>
-      <Text>Wednesday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "wednesday" } }} style={styles.button}>
-        {weekListString["wednesday"]}
-      </Link>
-      <Text>Thursday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "thursday" } }} style={styles.button}>
-        {weekListString["thursday"]}
-      </Link>
-      <Text>Friday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "friday" } }} style={styles.button}>
-        {weekListString["friday"]}
-      </Link>
-      <Text>Saturday</Text>
-      <Link href={{pathname:"/weekdaysEdit", params: { weekday: "saturday" } }} style={styles.button}>
-        {weekListString["saturday"]}
-      </Link>
-      
+
+      <View>
+        <FlatList 
+          data={scheduleData} 
+          renderItem={({ item }) => {
+            return (
+            <View>
+              <Link href={{pathname:"/weekdaysEdit", params: { weekday: item.weekday } }} style={styles.button}>
+                {item.weekday}
+              </Link>
+              <Text style={styles.link}> {item.splitName} </Text>
+            </View>
+          );
+        }}
+        />
+      </View>
       
     </View>
   );
@@ -123,6 +93,8 @@ const styles = StyleSheet.create({
   link: {
     paddingTop: 20,
     fontSize: 20,
+    color: '#FFF',
+    textAlign: 'center',
   },
   input: {
     height: 40,

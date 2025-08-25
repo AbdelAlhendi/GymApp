@@ -1,20 +1,17 @@
 import { Stack } from "expo-router";
-// import * as SQLite from 'expo-sqlite';
-// import { SQLiteProvider, SQLiteDatabase } from "expo-sqlite";
-import * as SQLite from 'expo-sqlite';
 
-import { SQLiteProvider, useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
+import { SQLiteProvider, type SQLiteDatabase } from 'expo-sqlite';
 import React from "react";
 
-
-// const db = SQLite.openDatabaseSync('workoutDB.db');
+const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 
 export default function RootLayout() {
 
 
   const createDbIfNeeded = async (db: SQLiteDatabase) => {
-
+    // const query2 = "DROP TABLE schedule"
+    // db.execAsync(query2)
     
     const table = "CREATE TABLE IF NOT EXISTS workouts (\n"
                     + "   workout TEXT PRIMARY KEY,\n"
@@ -30,7 +27,7 @@ export default function RootLayout() {
 
     const table3 = "CREATE TABLE IF NOT EXISTS schedule (\n"
     + "   weekday TEXT PRIMARY KEY,\n"
-    + "   splitName TEXT NOT NULL,\n"
+    + "   splitName TEXT,\n"
     + "   FOREIGN KEY (splitName) REFERENCES splits(splitName)\n" + 
     ");";
 
@@ -70,6 +67,19 @@ export default function RootLayout() {
     await db.execAsync(
       table4
     );
+
+    try {
+      const query = "INSERT INTO schedule (weekday) VALUES (?);"
+      for (var i = 0; i < weekdays.length; i++) {
+        await db.runAsync(query, 
+          String(weekdays.at(i))
+        )
+      }
+      console.log("Weekdays inserted successfully")
+    } catch (error) {
+      console.log("Weekdays already inserted")
+    }
+    
   };
 
 

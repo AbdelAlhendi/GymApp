@@ -43,6 +43,7 @@ export default function Splits( ) {
       const loadSplits = async () => {
         const result = await database.getAllAsync<Splits>("SELECT * FROM workoutLsts;");
         setData(result);
+        console.log(result)
       };
     
       useFocusEffect(
@@ -80,10 +81,7 @@ export default function Splits( ) {
           );
         }}
         />
-      </View>
-
-      <Link href={{pathname:"/splitEdit", params: {split : "Split Name"} }} style={styles.button}> Add a new Split </Link>
-      
+      </View>      
     </View>
   );
 }
