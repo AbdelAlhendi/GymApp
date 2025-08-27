@@ -70,8 +70,32 @@ export default function HomeLayout() {
         
       }}
       />
+      <Tabs.Screen
+        name="splitEdit"
+        options={{
+          title: 'SplitEdit',
+          headerShown: false,
+          href: null
+        }}
+      />
+      <Tabs.Screen
+        name="splitEditModal"
+        options={{      
+          title:"splitEditModal",
+          href: null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="splitValueEditModal"
+        options={{      
+          title:"splitValueEditModal",
+          href: null,
+          headerShown: false,
+        }}
+        />
      
-      
+{/*       
       <Stack.Navigator>
       
         <Stack.Screen
@@ -100,7 +124,7 @@ export default function HomeLayout() {
             presentation: 'modal',
             headerShown: false,}}
         />
-      </Stack.Navigator>
+      </Stack.Navigator> */}
       /</Tabs>
       
 

@@ -35,6 +35,19 @@ export default function Workouts() {
     }
   };
 
+  const deleteWorkout = async (workoutVar: string) => {
+    try {
+
+      const query1 = "DELETE FROM workouts WHERE workout = ?";
+      database.runAsync(query1, [
+        workoutVar,
+      ]);
+
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
   var [weightVar, onChangeText2] = React.useState(Number(0));
   var [notesVar, onChangeText3] = React.useState("");
   var [workoutVar, onChangeText4] = React.useState("");
@@ -83,6 +96,13 @@ export default function Workouts() {
       
               }}
           />
+          <Button
+          title={"Delete Workout"}
+          color='#f90202'
+              onPress={() => {
+                deleteWorkout(String(workoutVar))
+              }}
+          />
       
       
     </View>
@@ -107,7 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   title: {
-    marginTop: 16,
+    marginTop: 40,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderWidth: 4,

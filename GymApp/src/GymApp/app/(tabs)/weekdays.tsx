@@ -30,7 +30,7 @@ export default function Weekdays() {
   return (
     <View
       style={styles.container}>
-      <Text style={styles.title}>WEEKDAYS SCREEN</Text>
+      <Text style={styles.title}>Weekdays</Text>
 
       <View>
         <FlatList 
@@ -60,18 +60,18 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
     borderWidth: 4,
     borderColor: '#f90202',
     borderRadius: 4,
     backgroundColor: '#000000',
     color: '#FFF',
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 18,
   },
   title: {
-    marginTop: 16,
+    marginTop: 40,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderWidth: 4,

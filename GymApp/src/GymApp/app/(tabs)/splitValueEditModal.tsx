@@ -115,6 +115,7 @@ container: {
     fontSize: 20,
   },
   input: {
+    marginTop: 40,
     height: 40,
     margin: 12,
     borderWidth: 5,

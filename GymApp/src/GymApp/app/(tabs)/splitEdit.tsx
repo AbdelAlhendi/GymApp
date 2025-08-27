@@ -198,23 +198,54 @@ export default function SplitEdit() {
     }
   };
 
+  // const [currentPage2, setCurrentPage2] = useState(0);
+  
+  // const _handleLoadMore = () => {
+  //   setCurrentPage2(currentPage2 + 10);
+  //   console.log("Load more items")
+  // }
+
   return (
     
     <View style={styles.container}>
-    <Text style={styles.title}>SPLITS EDIT SCREEN</Text>
+    <Text style={styles.title}>Splits Edit Screen</Text>
     <TextInput
           style={styles.input}
           onChangeText={onChangeText1}
           value={String(splitName)}
     />
 
-    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={styles.button}>
+    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={{
+      marginTop: 2,
+      flexDirection: "row",
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderWidth: 2,
+      borderColor: '#f90202',
+      borderRadius: 2,
+      backgroundColor: '#000000',
+      color: '#FFF',
+      textAlign: "center",
+      fontSize: 15,
+
+    }}>
       Add a Workout
     </Link>
+{/* 
+    <Button
+      title={"Load More"}
+      color="#FFF"
+      
+      
+      onPress={() => {
+        _handleLoadMore();
+        }}
+    /> */}
 
     <View>
       <FlatList 
         data={splitList2} 
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
         renderItem={({ item }) => {
           return (
           <View>
@@ -224,6 +255,7 @@ export default function SplitEdit() {
             <Button
                 title={"Delete"}
                 color="#e43404"
+                
                   onPress={() => {
                     for (var i = 0; i < splitList2.length; i++) {
                       if (item.workout == splitList2.at(i)?.workout) {
@@ -243,21 +275,6 @@ export default function SplitEdit() {
       />
     </View>
 
-    <Link href={{pathname:"/splitEditModal", params: {splitName : String(splitName)} }} style={styles.button}>
-      Add a Workout
-    </Link>
-
-    {/* <Button
-      title="save"
-      color="#f90202"
-      onPress={() => {
-        postSplit(String(splitName), String(split))
-        console.log(splitList)
-        console.log(splitName)
-
-      }}
-      
-    /> */}
 
     </View>
   );
@@ -269,19 +286,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderWidth: 4,
+    marginTop: 5,
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderWidth: 2,
     borderColor: '#f90202',
-    borderRadius: 4,
+    borderRadius: 2,
     backgroundColor: '#000000',
     color: '#FFF',
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 15,
   },
   title: {
-    marginTop: 16,
+    marginTop: 40,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderWidth: 4,
@@ -290,7 +308,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     color: '#FFF',
     textAlign: 'center',
-    fontSize: 30,
+    fontSize: 25,
   },
   imageContainer: {
     flex: 1,

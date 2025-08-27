@@ -209,7 +209,7 @@ export default function splitEditModal() {
   };
 
 
-  const [allWorkouts, setWorkoutData] = useState<Workouts[]>([]);
+  var [allWorkouts, setWorkoutData] = useState<Workouts[]>([]);
 
 
   const loadWorkouts = async () => {
@@ -224,16 +224,47 @@ export default function splitEditModal() {
       loadWorkouts();
     }, [])
   );
+
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const _handleLoadMore = () => {
+    setCurrentPage(currentPage + 7);
+    console.log("Load more items")
+  }
+
+  const _handleLoadLess = () => {
+    setCurrentPage(currentPage - 7);
+    console.log("Load more items")
+  }
   
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Workouts</Text>
 
-      <Link href={{pathname:"/splitEdit" }} style={styles.button}>
+      <Link href={{pathname:"/splitEdit" }} style={{
+        marginTop: 5,
+      paddingVertical: 4,
+      paddingHorizontal: 4,
+      borderWidth: 4,
+      borderColor: '#f90202',
+      borderRadius: 4,
+      backgroundColor: '#000000',
+      color: '#FFF',
+      textAlign: 'center',
+      fontSize: 12,
+      }}>
         back
       </Link>
 
-    <View style={styles.button}>
+    <View style={{    
+      marginTop: 3,
+      paddingVertical: 2,
+      paddingHorizontal: 2,
+      borderWidth: 2,
+      borderColor: '#f90202',
+      borderRadius: 2,
+      backgroundColor: '#000000',
+    }}>
       <Button
         title={"Save"}
         color="#FFF"
@@ -245,17 +276,34 @@ export default function splitEditModal() {
       </View>
 
 
-
+      <Button
+        title={"Load More"}
+        color="#FFF"
+        
+        onPress={() => {
+          _handleLoadMore();
+          }}
+      />
+      <Button
+        title={"Load Less"}
+        color="#FFF"
+        
+        onPress={() => {
+          _handleLoadLess();
+          }}
+      />
       <View>
         <FlatList 
-          data={allWorkouts} 
+          data={allWorkouts.slice(currentPage, currentPage + 7)}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
           renderItem={({ item }) => {
             return (
-            <View style={styles.button}>
+              <View style={styles.button} >
               <Button
                 
                 title={`${item.workout} - ${item.weight} (${item.notes})`}
                 color="#FFF"
+                
                 
                 onPress={() => {
                   console.log("splitList2 before adding a new workout: " + splitList3)
@@ -291,16 +339,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderWidth: 4,
+    marginTop: 5,
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderWidth: 2,
     borderColor: '#f90202',
-    borderRadius: 4,
+    borderRadius: 2,
     backgroundColor: '#000000',
     color: '#FFF',
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 12,
   },
   title: {
     marginTop: 16,

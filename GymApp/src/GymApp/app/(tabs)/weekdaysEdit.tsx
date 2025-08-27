@@ -51,7 +51,7 @@ export default function WeekdaysEdit() {
     <View
       style={styles.container}
     >
-      <Text style={styles.title}>WEEKDAYS EDIT SCREEN</Text>
+      <Text style={styles.title}>Weekdays Edit Screen</Text>
 
       <Link href={{pathname:"/weekdays" }} style={styles.button}>
         back
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   title: {
-    marginTop: 16,
+    marginTop: 40,
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderWidth: 4,
